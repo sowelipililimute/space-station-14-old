@@ -19,6 +19,7 @@ using Content.Shared.Roles;
 using Content.Shared.Traits;
 using Microsoft.EntityFrameworkCore;
 using Robust.Shared.Enums;
+using Robust.Shared.GameObjects.Components.Localization;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
@@ -266,6 +267,17 @@ namespace Content.Server.Database
                 profile.Age,
                 sex,
                 gender,
+                new Pronoun(
+                   profile.Pronouns?.Subject,
+                   profile.Pronouns?.Object,
+                   profile.Pronouns?.DatObj,
+                   profile.Pronouns?.Genitive,
+                   profile.Pronouns?.PossAdj,
+                   profile.Pronouns?.PossPronoun,
+                   profile.Pronouns?.Reflexive,
+                   profile.Pronouns?.Counter,
+                   profile.Pronouns?.Plural
+                ),
                 new HumanoidCharacterAppearance
                 (
                     profile.HairName,
@@ -312,6 +324,18 @@ namespace Content.Server.Database
             profile.Markings = markings;
             profile.Slot = slot;
             profile.PreferenceUnavailable = (DbPreferenceUnavailableMode) humanoid.PreferenceUnavailable;
+
+            var pronoun = humanoid.Pronoun;
+            profile.Pronouns ??= new Pronouns();
+            profile.Pronouns.Subject = pronoun?.Subject;
+            profile.Pronouns.Object = pronoun?.Object;
+            profile.Pronouns.DatObj = pronoun?.DatObj;
+            profile.Pronouns.Genitive = pronoun?.Genitive;
+            profile.Pronouns.PossAdj = pronoun?.PossAdj;
+            profile.Pronouns.PossPronoun = pronoun?.PossPronoun;
+            profile.Pronouns.Reflexive = pronoun?.Reflexive;
+            profile.Pronouns.Counter = pronoun?.Counter;
+            profile.Pronouns.Plural = pronoun?.Plural;
 
             profile.Jobs.Clear();
             profile.Jobs.AddRange(
