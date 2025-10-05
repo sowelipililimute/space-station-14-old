@@ -38,6 +38,7 @@ namespace Content.Client.IconSmoothing
             base.Initialize();
 
             InitializeEdge();
+            InitializeTrim();
             SubscribeLocalEvent<IconSmoothComponent, AnchorStateChangedEvent>(OnAnchorChanged);
             SubscribeLocalEvent<IconSmoothComponent, ComponentShutdown>(OnShutdown);
             SubscribeLocalEvent<IconSmoothComponent, ComponentStartup>(OnStartup);
@@ -76,6 +77,7 @@ namespace Content.Client.IconSmoothing
 
             component.StateBase = newState;
             SetCornerLayers((uid, sprite), component);
+            InitializeTrimLayers((uid, component, sprite, null));
         }
 
         private void SetCornerLayers(Entity<SpriteComponent?> sprite, IconSmoothComponent component)
@@ -237,13 +239,13 @@ namespace Content.Client.IconSmoothing
 
                         gridEntity = (gridUid, grid);
 
-                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery))
+                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery, out _))
                             directions |= DirectionFlag.North;
-                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery))
+                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery, out _))
                             directions |= DirectionFlag.South;
-                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery))
+                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery, out _))
                             directions |= DirectionFlag.East;
-                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery))
+                        if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery, out _))
                             directions |= DirectionFlag.West;
                     }
 
@@ -320,7 +322,7 @@ namespace Content.Client.IconSmoothing
             for (var i = 0; i < neighbors.Length; i++)
             {
                 var neighbor = (Vector2i)rotation.RotateVec(neighbors[i]);
-                matching = matching && MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos + neighbor), smoothQuery);
+                matching = matching && MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos + neighbor), smoothQuery, out _);
             }
 
             if (matching)
@@ -347,13 +349,13 @@ namespace Content.Client.IconSmoothing
             var grid = gridEntity.Value.Comp;
 
             var pos = _mapSystem.TileIndicesFor(gridUid, grid, xform.Coordinates);
-            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery))
+            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery, out var otherN))
                 dirs |= CardinalConnectDirs.North;
-            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery))
+            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery, out var otherS))
                 dirs |= CardinalConnectDirs.South;
-            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery))
+            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery, out var otherE))
                 dirs |= CardinalConnectDirs.East;
-            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery))
+            if (MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery, out var otherW))
                 dirs |= CardinalConnectDirs.West;
 
             _sprite.LayerSetRsiState(sprite.AsNullable(), 0, $"{smooth.StateBase}{(int)dirs}");
@@ -370,19 +372,33 @@ namespace Content.Client.IconSmoothing
                 directions |= DirectionFlag.West;
 
             CalculateEdge(sprite, directions, sprite);
+
+            var trims = DirectionFlag.None;
+
+            if (otherN)
+                trims |= DirectionFlag.North;
+            if (otherS)
+                trims |= DirectionFlag.South;
+            if (otherE)
+                trims |= DirectionFlag.East;
+            if (otherW)
+                trims |= DirectionFlag.West;
+
+            CalculateTrim((sprite.Owner, null, sprite.Comp), trims);
         }
 
-        private bool MatchingEntity(IconSmoothComponent smooth, AnchoredEntitiesEnumerator candidates, EntityQuery<IconSmoothComponent> smoothQuery)
+        private bool MatchingEntity(IconSmoothComponent smooth, AnchoredEntitiesEnumerator candidates, EntityQuery<IconSmoothComponent> smoothQuery, out bool isOther)
         {
+            isOther = false;
             while (candidates.MoveNext(out var entity))
             {
-                if (smoothQuery.TryGetComponent(entity, out var other) &&
-                    other.SmoothKey != null &&
-                    (other.SmoothKey == smooth.SmoothKey || smooth.AdditionalKeys.Contains(other.SmoothKey)) &&
-                    other.Enabled)
-                {
+                if (!smoothQuery.TryGetComponent(entity, out var other) || other.SmoothKey == null || !other.Enabled)
+                    continue;
+
+                isOther = smooth.AdditionalKeys.Contains(other.SmoothKey);
+
+                if (other.SmoothKey == smooth.SmoothKey || isOther)
                     return true;
-                }
             }
 
             return false;
@@ -390,9 +406,11 @@ namespace Content.Client.IconSmoothing
 
         private void CalculateNewSpriteCorners(Entity<MapGridComponent>? gridEntity, IconSmoothComponent smooth, Entity<SpriteComponent> spriteEnt, TransformComponent xform, EntityQuery<IconSmoothComponent> smoothQuery)
         {
-            var (cornerNE, cornerNW, cornerSW, cornerSE) = gridEntity == null
-                ? (CornerFill.None, CornerFill.None, CornerFill.None, CornerFill.None)
+            var (smoothed, trimmed) = gridEntity == null
+                ? (CornerFills.None, CornerFills.None)
                 : CalculateCornerFill(gridEntity.Value, smooth, xform, smoothQuery);
+
+            var (cornerNE, cornerNW, cornerSW, cornerSE) = smoothed;
 
             // TODO figure out a better way to set multiple sprite layers.
             // This will currently re-calculate the sprite bounding box 4 times.
@@ -405,101 +423,120 @@ namespace Content.Client.IconSmoothing
             _sprite.LayerSetRsiState(spriteEnt.AsNullable(), CornerLayers.SW, $"{smooth.StateBase}{(int)cornerSW}");
             _sprite.LayerSetRsiState(spriteEnt.AsNullable(), CornerLayers.NW, $"{smooth.StateBase}{(int)cornerNW}");
 
-            var directions = DirectionFlag.None;
-
-            if ((cornerSE & cornerSW) != CornerFill.None)
-                directions |= DirectionFlag.South;
-
-            if ((cornerSE & cornerNE) != CornerFill.None)
-                directions |= DirectionFlag.East;
-
-            if ((cornerNE & cornerNW) != CornerFill.None)
-                directions |= DirectionFlag.North;
-
-            if ((cornerNW & cornerSW) != CornerFill.None)
-                directions |= DirectionFlag.West;
-
-            CalculateEdge(spriteEnt, directions, sprite);
+            CalculateEdge(spriteEnt, smoothed.EdgeDirections(), sprite);
+            CalculateTrim((spriteEnt, null, sprite), trimmed.EdgeDirections());
         }
 
-        private (CornerFill ne, CornerFill nw, CornerFill sw, CornerFill se) CalculateCornerFill(Entity<MapGridComponent> gridEntity, IconSmoothComponent smooth, TransformComponent xform, EntityQuery<IconSmoothComponent> smoothQuery)
+        private record struct CornerFills(CornerFill NE, CornerFill NW, CornerFill SW, CornerFill SE)
+        {
+            public static readonly CornerFills None = new(CornerFill.None, CornerFill.None, CornerFill.None, CornerFill.None);
+
+            public DirectionFlag EdgeDirections()
+            {
+                var directions = DirectionFlag.None;
+
+                if (SE != CornerFill.None && SW != CornerFill.None)
+                    directions |= DirectionFlag.South;
+
+                if (SE != CornerFill.None && NE != CornerFill.None)
+                    directions |= DirectionFlag.East;
+
+                if (NE != CornerFill.None && NW != CornerFill.None)
+                    directions |= DirectionFlag.North;
+
+                if (NW != CornerFill.None && SW != CornerFill.None)
+                    directions |= DirectionFlag.West;
+
+                return directions;
+            }
+
+            public static CornerFills FromNearby(bool n, bool ne, bool e, bool se, bool s, bool sw, bool w, bool nw, Direction direction)
+            {
+                // ReSharper disable InconsistentNaming
+                var cornerNE = CornerFill.None;
+                var cornerSE = CornerFill.None;
+                var cornerSW = CornerFill.None;
+                var cornerNW = CornerFill.None;
+                // ReSharper restore InconsistentNaming
+
+                if (n)
+                {
+                    cornerNE |= CornerFill.CounterClockwise;
+                    cornerNW |= CornerFill.Clockwise;
+                }
+
+                if (ne)
+                {
+                    cornerNE |= CornerFill.Diagonal;
+                }
+
+                if (e)
+                {
+                    cornerNE |= CornerFill.Clockwise;
+                    cornerSE |= CornerFill.CounterClockwise;
+                }
+
+                if (se)
+                {
+                    cornerSE |= CornerFill.Diagonal;
+                }
+
+                if (s)
+                {
+                    cornerSE |= CornerFill.Clockwise;
+                    cornerSW |= CornerFill.CounterClockwise;
+                }
+
+                if (sw)
+                {
+                    cornerSW |= CornerFill.Diagonal;
+                }
+
+                if (w)
+                {
+                    cornerSW |= CornerFill.Clockwise;
+                    cornerNW |= CornerFill.CounterClockwise;
+                }
+
+                if (nw)
+                {
+                    cornerNW |= CornerFill.Diagonal;
+                }
+
+                switch (direction)
+                {
+                    case Direction.North:
+                        return new(cornerSW, cornerSE, cornerNE, cornerNW);
+                    case Direction.West:
+                        return new(cornerSE, cornerNE, cornerNW, cornerSW);
+                    case Direction.South:
+                        return new(cornerNE, cornerNW, cornerSW, cornerSE);
+                    default:
+                        return new(cornerNW, cornerSW, cornerSE, cornerNE);
+                }
+            }
+        }
+
+        private (CornerFills Smoothed, CornerFills Trimmed) CalculateCornerFill(Entity<MapGridComponent> gridEntity, IconSmoothComponent smooth, TransformComponent xform, EntityQuery<IconSmoothComponent> smoothQuery)
         {
             var gridUid = gridEntity.Owner;
             var grid = gridEntity.Comp;
 
             var pos = _mapSystem.TileIndicesFor(gridUid, grid, xform.Coordinates);
-            var n = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery);
-            var ne = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.NorthEast)), smoothQuery);
-            var e = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery);
-            var se = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.SouthEast)), smoothQuery);
-            var s = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery);
-            var sw = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.SouthWest)), smoothQuery);
-            var w = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery);
-            var nw = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.NorthWest)), smoothQuery);
+            var n = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.North)), smoothQuery, out var trimN);
+            var ne = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.NorthEast)), smoothQuery, out var trimNE);
+            var e = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.East)), smoothQuery, out var trimE);
+            var se = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.SouthEast)), smoothQuery, out var trimSE);
+            var s = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.South)), smoothQuery, out var trimS);
+            var sw = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.SouthWest)), smoothQuery, out var trimSW);
+            var w = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.West)), smoothQuery, out var trimW);
+            var nw = MatchingEntity(smooth, _mapSystem.GetAnchoredEntitiesEnumerator(gridUid, grid, pos.Offset(Direction.NorthWest)), smoothQuery, out var trimNW);
 
-            // ReSharper disable InconsistentNaming
-            var cornerNE = CornerFill.None;
-            var cornerSE = CornerFill.None;
-            var cornerSW = CornerFill.None;
-            var cornerNW = CornerFill.None;
-            // ReSharper restore InconsistentNaming
+            var direction = xform.LocalRotation.GetCardinalDir();
+            var smoothed = CornerFills.FromNearby(n, ne, e, se, s, sw, w, nw, direction);
+            var trimmed = CornerFills.FromNearby(trimN, trimNE, trimE, trimSE, trimS, trimSW, trimW, trimNW, direction);
 
-            if (n)
-            {
-                cornerNE |= CornerFill.CounterClockwise;
-                cornerNW |= CornerFill.Clockwise;
-            }
-
-            if (ne)
-            {
-                cornerNE |= CornerFill.Diagonal;
-            }
-
-            if (e)
-            {
-                cornerNE |= CornerFill.Clockwise;
-                cornerSE |= CornerFill.CounterClockwise;
-            }
-
-            if (se)
-            {
-                cornerSE |= CornerFill.Diagonal;
-            }
-
-            if (s)
-            {
-                cornerSE |= CornerFill.Clockwise;
-                cornerSW |= CornerFill.CounterClockwise;
-            }
-
-            if (sw)
-            {
-                cornerSW |= CornerFill.Diagonal;
-            }
-
-            if (w)
-            {
-                cornerSW |= CornerFill.Clockwise;
-                cornerNW |= CornerFill.CounterClockwise;
-            }
-
-            if (nw)
-            {
-                cornerNW |= CornerFill.Diagonal;
-            }
-
-            // Local is fine as we already know it's parented to the grid (due to the way anchoring works).
-            switch (xform.LocalRotation.GetCardinalDir())
-            {
-                case Direction.North:
-                    return (cornerSW, cornerSE, cornerNE, cornerNW);
-                case Direction.West:
-                    return (cornerSE, cornerNE, cornerNW, cornerSW);
-                case Direction.South:
-                    return (cornerNE, cornerNW, cornerSW, cornerSE);
-                default:
-                    return (cornerNW, cornerSW, cornerSE, cornerNE);
-            }
+            return (smoothed, trimmed);
         }
 
         // TODO consider changing this to use DirectionFlags?
