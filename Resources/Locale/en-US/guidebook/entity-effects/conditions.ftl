@@ -25,6 +25,12 @@ entity-condition-guidebook-group-damage =
                  }
     }
 
+entity-condition-anchored =
+    { $inverted ->
+        [true] it is anchored
+       *[false] it is not anchored
+    }
+
 entity-condition-guidebook-total-hunger =
     { $max ->
         [2147483648] the target has at least {NATURALFIXED($min, 2)} total hunger

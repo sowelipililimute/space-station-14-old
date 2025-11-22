@@ -983,9 +983,35 @@
   - type: Sprite
     sprite: Structures/Walls/solid.rsi
   - type: WallReplacementMarker
-  - type: Construction
-    graph: Girder
-    node: wall
+  - type: CraftingGraph
+    graph: !type:AggregateCraftingGraphReference
+      aggregate: Girder
+    currentNode: WallSolid
+  - type: AggregateCraftingEdges
+    aggregateInto: Girder
+    edges:
+    - target: WallSolid
+      steps:
+      - !type:StackCraftingStep
+        stack: Steel
+        amount: 2
+        delay: 1
+  - type: AggregateCraftingGraph
+    aggregateInto: Girder
+    graph:
+      nodes:
+        WallSolid:
+          result: WallSolid
+          edges:
+          - target: Girder
+            completedEffects:
+            - !type:SpawnEntity
+              entity: SheetSteel1
+              number: 2
+            steps:
+            - !type:ToolCraftingStep
+              tools: [Welding]
+              delay: 10
   - type: Icon
     sprite: Structures/Walls/solid.rsi
   - type: RCDDeconstructable

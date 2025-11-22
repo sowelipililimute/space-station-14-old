@@ -1,3 +1,9 @@
+- type: aggregateCraftingGraph
+  id: Girder
+
+- type: aggregateCraftingGraphEdges
+  id: Girder
+
 - type: entity
   id: Girder
   parent: BaseStructureDynamic
@@ -21,9 +27,44 @@
         layer:
         - GlassAirlockLayer
   - type: InteractionOutline
-  - type: Construction
-    graph: Girder
-    node: girder
+  - type: CraftingGraph
+    graph: !type:AggregateCraftingGraphReference
+      aggregate: Girder
+    currentNode: Girder
+  - type: AggregateCraftingEdges
+    aggregateInto: Girder
+    edges:
+    - target: Start
+      completed:
+      - !type:SpawnEntity
+        entity: SteelSheet1
+        number: 2
+      - !type:DeleteEntity
+      conditions:
+      - !type:AnchoredCondition
+        inverted: true
+      steps:
+      - !type:ToolCraftingStep
+        tools: [Screwing]
+        delay: 2
+  - type: AggregateCraftingGraph
+    aggregateInto: Girder
+    graph:
+      nodes:
+        Start:
+          edges:
+          - target: Girder
+            completedEffects:
+            - !type:SnapToGrid
+            steps:
+            - !type:StackCraftingStep
+              stack: Steel
+              amount: 2
+              delay: 1
+        Girder:
+          result: Girder
+          edges: !type:AggregateCraftingGraphEdges
+            aggregate: Girder
   - type: Sprite
     sprite: Structures/Walls/solid.rsi
     state: wall_girder

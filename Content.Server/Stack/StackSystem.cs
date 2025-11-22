@@ -17,14 +17,8 @@ namespace Content.Server.Stack
 
         #region Spawning
 
-        /// <summary>
-        /// Spawns a new entity and moves an amount to it from the stack.
-        /// Moves nothing if amount is greater than ent's stack count.
-        /// </summary>
-        /// <param name="amount"> How much to move to the new entity. </param>
-        /// <returns>Null if StackComponent doesn't resolve, or amount to move is greater than ent has available.</returns>
-        [PublicAPI]
-        public EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition)
+        /// <inheritdoc />
+        public override EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition)
         {
             if (!Resolve(ent.Owner, ref ent.Comp))
                 return null;

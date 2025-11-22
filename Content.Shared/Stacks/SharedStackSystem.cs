@@ -8,6 +8,7 @@ using Content.Shared.Storage.EntitySystems;
 using Content.Shared.Verbs;
 using JetBrains.Annotations;
 using Robust.Shared.GameStates;
+using Robust.Shared.Map;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -230,6 +231,18 @@ public abstract partial class SharedStackSystem : EntitySystem
     protected virtual void UserSplit(Entity<StackComponent> stack, Entity<TransformComponent?> user, int amount)
     {
 
+    }
+
+    /// <summary>
+    /// Spawns a new entity and moves an amount to it from the stack.
+    /// Moves nothing if amount is greater than ent's stack count.
+    /// </summary>
+    /// <param name="amount"> How much to move to the new entity. </param>
+    /// <returns>Null if StackComponent doesn't resolve, or amount to move is greater than ent has available.</returns>
+    [PublicAPI]
+    public virtual EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition)
+    {
+        return null;
     }
 }
 
