@@ -1,0 +1,451 @@
+- type: entity
+  id: OFMBody
+  name: body
+  suffix: OFM
+  abstract: true
+  components:
+  - type: OFMBody
+
+- type: entity
+  id: OFMOrganBase
+  name: organ
+  suffix: OFM
+  abstract: true
+  parent: BaseItem
+  components:
+  - type: OFMOrgan
+
+- type: entity
+  abstract: true
+  id: OFMBodyLayers
+  components:
+  - type: Sprite
+    layers:
+    # Torso
+    - map: [ "enum.HumanoidVisualLayers.Chest" ]
+
+    # Head
+    - map: [ "enum.HumanoidVisualLayers.Head" ]
+    - map: [ "enum.HumanoidVisualLayers.Snout" ]
+    - map: [ "enum.HumanoidVisualLayers.Eyes" ]
+
+    # Limbs
+    - map: [ "enum.HumanoidVisualLayers.RArm" ]
+    - map: [ "enum.HumanoidVisualLayers.LArm" ]
+    - map: [ "enum.HumanoidVisualLayers.RLeg" ]
+    - map: [ "enum.HumanoidVisualLayers.LLeg" ]
+
+    # Underwear & clothing
+    - map: [ "enum.HumanoidVisualLayers.UndergarmentBottom" ]
+    - map: [ "enum.HumanoidVisualLayers.UndergarmentTop" ]
+    - map: ["jumpsuit"]
+
+    # Extremities
+    - map: ["enum.HumanoidVisualLayers.LFoot"]
+    - map: ["enum.HumanoidVisualLayers.RFoot"]
+    - map: ["enum.HumanoidVisualLayers.LHand"]
+    - map: ["enum.HumanoidVisualLayers.RHand"]
+
+    # More equipment
+    - map: [ "gloves" ]
+    - map: [ "shoes" ]
+    - map: [ "ears" ]
+    - map: [ "eyes" ]
+    - map: [ "belt" ]
+    - map: [ "id" ]
+    - map: [ "outerClothing" ]
+    - map: [ "back" ]
+    - map: [ "neck" ]
+
+    # Stuff that goes in front of equipment
+    - map: [ "enum.HumanoidVisualLayers.SnoutCover" ]
+    - map: [ "enum.HumanoidVisualLayers.FacialHair" ]
+    - map: [ "enum.HumanoidVisualLayers.Hair" ]
+    - map: [ "enum.HumanoidVisualLayers.HeadSide" ]
+    - map: [ "enum.HumanoidVisualLayers.HeadTop" ]
+    - map: [ "enum.HumanoidVisualLayers.Tail" ]
+
+    # Stuff that goes in front of stuff that goes in front of equipment
+    - map: [ "mask" ]
+    - map: [ "head" ]
+    - map: [ "pocket1" ]
+    - map: [ "pocket2" ]
+
+    # Extra stuff
+    - map: ["enum.HumanoidVisualLayers.Handcuffs"]
+      color: "#ffffff"
+      sprite: Objects/Misc/handcuffs.rsi
+      state: body-overlay-2
+      visible: false
+
+    - map: [ "clownedon" ] # Dynamically generated
+      sprite: "Effects/creampie.rsi"
+      state: "creampie_human"
+      visible: false
+
+- type: entity
+  id: OFMNuristBase
+  parent:
+  - BaseMob
+  - OFMBody
+  - OFMBodyLayers
+
+  - MobCombat
+  - MobDamageable
+  - StripableInventoryBase
+
+  - MobRespirator
+  - MobAtmosStandard
+  - MobFlammable
+  components:
+  - type: StatusIcon
+    bounds: -0.5,-0.5,0.5,0.5
+  - type: RotationVisuals
+    defaultRotation: 90
+    horizontalRotation: 90
+  - type: TypingIndicator
+  - type: SlowOnDamage
+    speedModifierThresholds:
+      60: 0.7
+      80: 0.5
+  - type: Fixtures
+    fixtures: # TODO: This needs a second fixture just for mob collisions.
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.35
+        density: 185
+        restitution: 0.0
+        mask:
+        - MobMask
+        layer:
+        - MobLayer
+  - type: FloorOcclusion
+  - type: RangedDamageSound
+    soundGroups:
+      Brute:
+        collection:
+          MeatBulletImpact
+    soundTypes:
+      Heat:
+        collection:
+          MeatLaserImpact
+  - type: Reactive
+    groups:
+      Flammable: [ Touch ]
+      Extinguish: [ Touch ]
+      Acidic: [Touch, Ingestion]
+    reactions:
+    - reagents: [Water, SpaceCleaner]
+      methods: [Touch]
+      effects:
+      - !type:WashCreamPie
+  - type: StatusEffects
+    allowed:
+    - Electrocution
+    - RatvarianLanguage
+    - PressureImmunity
+    - Muted
+    - TemporaryBlindness
+    - Pacified
+    - Flashed
+    - RadiationProtection
+    - Adrenaline
+  - type: Identity
+  - type: IdExaminable
+  - type: Hands
+  - type: ComplexInteraction
+  - type: Internals
+  - type: FloatingVisuals
+  - type: Climbing
+  - type: Cuffable
+  - type: Ensnareable
+    sprite: Objects/Misc/ensnare.rsi
+    state: icon
+  - type: AnimationPlayer
+  - type: Buckle
+  - type: CombatMode
+    canDisarm: true
+  - type: MeleeWeapon
+    soundHit:
+      collection: Punch
+    angle: 30
+    animation: WeaponArcFist
+    attackRate: 1
+    damage:
+      types:
+        Blunt: 5
+  - type: SleepEmitSound
+  - type: SSDIndicator
+  - type: StandingState
+  - type: Crawler
+  - type: Dna
+  - type: MindContainer
+    showExamineInfo: true
+  - type: CanEnterCryostorage
+  - type: InteractionPopup
+    successChance: 1
+    interactSuccessString: hugging-success-generic
+    interactSuccessSound: /Audio/Effects/thudswoosh.ogg
+    messagePerceivedByOthers: hugging-success-generic-others
+  - type: CanHostGuardian
+  - type: NpcFactionMember
+    factions:
+    - NanoTrasen
+  - type: CreamPied
+  - type: ParcelWrapOverride
+    parcelPrototype: WrappedParcelHumanoid
+    wrapDelay: 5
+  - type: Stripping
+  - type: UserInterface
+    interfaces:
+      enum.HumanoidMarkingModifierKey.Key:
+        type: HumanoidMarkingModifierBoundUserInterface
+      enum.StrippingUiKey.Key:
+        type: StrippableBoundUserInterface
+  - type: Puller
+  - type: Speech
+    speechSounds: Alto
+  - type: DamageForceSay
+  - type: Vocal
+    sounds:
+      Male: MaleHuman
+      Female: FemaleHuman
+      Unsexed: MaleHuman
+  - type: Emoting
+  - type: BodyEmotes
+    soundsId: GeneralBodyEmotes
+  - type: Grammar
+    attributes:
+      proper: true
+  - type: MobPrice
+    price: 1500 # Kidnapping a living person and selling them for cred is a good move.
+    deathPenalty: 0.01 # However they really ought to be living and intact, otherwise they're worth 100x less.
+  - type: Tag
+    tags:
+    - CanPilot
+    - FootstepSound
+    - DoorBumpOpener
+    - AnomalyHost
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseTorso
+  name: torso
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.Chest
+    data:
+      state: torso_m
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.Tail
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseHead
+  name: head
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.Head
+    data:
+      state: head_m
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.Head
+    - enum.HumanoidVisualLayers.Hair
+    - enum.HumanoidVisualLayers.FacialHair
+    - enum.HumanoidVisualLayers.Snout
+    - enum.HumanoidVisualLayers.SnoutCover
+    - enum.HumanoidVisualLayers.HeadSide
+    - enum.HumanoidVisualLayers.HeadTop
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseArmLeft
+  name: left arm
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      state: l_arm
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.LArm
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseArmRight
+  name: right arm
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      state: r_arm
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.RArm
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseHandLeft
+  name: left hand
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.LHand
+    data:
+      state: l_hand
+  - type: OFMHandOrgan
+    handID: left
+    data:
+      location: Left
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.LHand
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseHandRight
+  name: right hand
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.RHand
+    data:
+      state: r_hand
+  - type: OFMHandOrgan
+    handID: right
+    data:
+      location: Right
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.RHand
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseLegLeft
+  name: left leg
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.LLeg
+    data:
+      state: l_leg
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.LLeg
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseLegRight
+  name: right leg
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.RLeg
+    data:
+      state: r_leg
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.RLeg
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseFootLeft
+  name: left foot
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.LFoot
+    data:
+      state: l_foot
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.LFoot
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseFootRight
+  name: right foot
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.RFoot
+    data:
+      state: r_foot
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.RFoot
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseBrain
+  name: brain
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseEyes
+  name: eyes
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    layer: enum.HumanoidVisualLayers.Eyes
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: eyes
+  - type: OFMVisualOrganMarkings
+    layers:
+    - enum.HumanoidVisualLayers.Eyes
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseTongue
+  name: tongue
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseAppendix
+  name: appendix
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseEars
+  name: ears
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseLungs
+  name: lungs
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseHeart
+  name: heart
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseStomach
+  name: stomach
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseLiver
+  name: liver
+  abstract: true
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganBaseKidneys
+  name: kidneys
+  abstract: true

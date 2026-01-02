@@ -13,6 +13,30 @@
   naming: First
   sexes:
   - Unsexed
+# Offbrand start
+  ofmPrototype: OFMVox
+  ofmOrgans:
+  - OFMOrganVoxTorso
+  - OFMOrganVoxHead
+  - OFMOrganVoxArmLeft
+  - OFMOrganVoxArmRight
+  - OFMOrganVoxHandLeft
+  - OFMOrganVoxHandRight
+  - OFMOrganVoxLegLeft
+  - OFMOrganVoxLegRight
+  - OFMOrganVoxFootLeft
+  - OFMOrganVoxFootRight
+  - OFMOrganVoxBrain
+  - OFMOrganVoxEyes
+  - OFMOrganVoxTongue
+  - OFMOrganVoxAppendix
+  - OFMOrganVoxEars
+  - OFMOrganVoxLungs
+  - OFMOrganVoxHeart
+  - OFMOrganVoxStomach
+  - OFMOrganVoxLiver
+  - OFMOrganVoxKidneys
+# Offbrand end
 
 - type: speciesBaseSprites
   id: MobVoxSprites

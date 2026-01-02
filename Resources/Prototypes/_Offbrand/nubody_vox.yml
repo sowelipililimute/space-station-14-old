@@ -1,0 +1,162 @@
+- type: entity
+  parent: OFMNuristBase
+  id: OFMVox
+  components:
+  - type: Inventory
+    speciesId: vox
+    displacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: jumpsuit
+      eyes:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: eyes
+      gloves:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: hand
+      head:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: head
+      neck:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: neck
+      back:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: back
+      ears:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: ears
+      shoes:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vox/displacement.rsi
+            state: shoes
+  - type: Hands
+    leftHandDisplacement:
+      sizeMaps:
+        32:
+          sprite: Mobs/Species/Vox/displacement.rsi
+          state: hand_l
+    rightHandDisplacement:
+      sizeMaps:
+        32:
+          sprite: Mobs/Species/Vox/displacement.rsi
+          state: hand_r
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganVox
+  abstract: true
+  suffix: vox
+
+- type: entity
+  parent: OFMOrganVox
+  id: OFMOrganVoxVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Vox/parts.rsi
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganVoxVisual ]
+  id: OFMOrganVoxTorso
+  components:
+  - type: OFMVisualOrgan
+    data:
+      state: torso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganVoxVisual ]
+  id: OFMOrganVoxHead
+  components:
+  - type: OFMVisualOrgan
+    data:
+      state: head
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganVoxVisual ]
+  id: OFMOrganVoxArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganVoxVisual ]
+  id: OFMOrganVoxArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganVoxVisual ]
+  id: OFMOrganVoxHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganVoxVisual ]
+  id: OFMOrganVoxHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganVoxVisual ]
+  id: OFMOrganVoxLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganVoxVisual ]
+  id: OFMOrganVoxLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganVoxVisual ]
+  id: OFMOrganVoxFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganVoxVisual ]
+  id: OFMOrganVoxFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganVox ]
+  id: OFMOrganVoxBrain
+
+- type: entity
+  parent: [ OFMOrganVoxVisual, OFMOrganBaseEyes ]
+  name: eyes
+  id: OFMOrganVoxEyes
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganVox ]
+  id: OFMOrganVoxTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganVox ]
+  id: OFMOrganVoxAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganVox ]
+  id: OFMOrganVoxEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganVox ]
+  id: OFMOrganVoxLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganVox ]
+  id: OFMOrganVoxHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganVox ]
+  id: OFMOrganVoxStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganVox ]
+  id: OFMOrganVoxLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganVox ]
+  id: OFMOrganVoxKidneys
