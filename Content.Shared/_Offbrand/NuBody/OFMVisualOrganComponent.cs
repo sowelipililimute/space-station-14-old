@@ -3,6 +3,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._Offbrand.NuBody;
 
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
+[Access(typeof(SharedOFMVisualBodySystem))]
 public sealed partial class OFMVisualOrganComponent : Component
 {
     /// <summary>

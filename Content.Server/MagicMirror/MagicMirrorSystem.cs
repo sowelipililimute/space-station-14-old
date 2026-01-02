@@ -350,7 +350,7 @@ public sealed class MagicMirrorSystem : SharedMagicMirrorSystem
     {
         component.DoAfter = null;
 
-        if (args.Handled || args.Target == null || args.Cancelled || !TryComp(component.Target, out HumanoidAppearanceComponent? humanoid))
+        if (args.Handled || args.Target == null || args.Cancelled || !TryComp(component.Target, out HumanoidProfileComponent? humanoid))
             return;
 
         MarkingCategories category;

@@ -65,32 +65,18 @@ public sealed partial class SpeciesPrototype : IPrototype
     [DataField("markingLimits")]
     public ProtoId<MarkingPointsPrototype> MarkingPoints { get; private set; } = default!;
 
-    /// <summary>
-    ///     Humanoid species variant used by this entity.
-    /// </summary>
-    [DataField(required: true)]
-    public EntProtoId Prototype { get; private set; } = default!;
-
-    /// <summary>
-    /// Prototype used by the species for the dress-up doll in various menus.
-    /// </summary>
-    [DataField(required: true)]
-    public EntProtoId DollPrototype { get; private set; } = default!;
-
     // Begin Offbrand
+    /// <summary>
+    /// Prototype used by the species for OFMBody, includes all mob functionalities
+    /// </summary>
+    [DataField("ofmMobPrototype")]
+    public EntProtoId OFMMobPrototype = default!;
 
     /// <summary>
-    /// Prototype used by the species for OFMBody
+    /// Prototype used by the species for OFMBody, visuals only
     /// </summary>
-    [DataField("ofmPrototype")]
-    public EntProtoId OFMPrototype = default!;
-
-    /// <summary>
-    /// Organs in this species
-    /// </summary>
-    [DataField("ofmOrgans")]
-    public List<EntProtoId> OFMOrgans = default!;
-
+    [DataField("ofmAppearancePrototype")]
+    public EntProtoId OFMAppearancePrototype = default!;
     // End Offbrand
 
     /// <summary>

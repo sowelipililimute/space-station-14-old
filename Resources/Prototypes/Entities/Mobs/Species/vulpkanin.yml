@@ -105,7 +105,7 @@
       sprite: "Effects/creampie.rsi"
       state: "creampie_vulpkanin"
       visible: false
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Vulpkanin
     undergarmentTop: UndergarmentTopTanktopVulpkanin
     undergarmentBottom: UndergarmentBottomBoxersVulpkanin
@@ -176,7 +176,7 @@
   id: MobVulpkaninDummy
   categories: [ HideSpawnMenu ]
   components:
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Vulpkanin
     hideLayersOnEquip:
     - Snout

@@ -9,6 +9,7 @@ using Content.Client.Players.PlayTimeTracking;
 using Content.Client.Stylesheets;
 using Content.Client.Sprite;
 using Content.Client.UserInterface.Systems.Guidebook;
+using Content.Shared._Offbrand.NuBody;
 using Content.Shared.CCVar;
 using Content.Shared.Clothing;
 using Content.Shared.GameTicking;
@@ -626,7 +627,7 @@ namespace Content.Client.Lobby.UI
             {
                 if (!speciesIds.Contains(Profile.Species))
                 {
-                    SetSpecies(SharedHumanoidAppearanceSystem.DefaultSpecies);
+                    SetSpecies(HumanoidCharacterProfile.DefaultSpecies);
                 }
             }
         }
@@ -795,7 +796,7 @@ namespace Content.Client.Lobby.UI
             if (Profile == null || !_entManager.EntityExists(PreviewDummy))
                 return;
 
-            _entManager.System<HumanoidAppearanceSystem>().LoadProfile(PreviewDummy, Profile);
+            _entManager.System<SharedOFMVisualBodySystem>().ApplyProfileTo(PreviewDummy, Profile);
 
             // Check and set the dirty flag to enable the save/reset buttons as appropriate.
             SetDirty();
@@ -808,7 +809,7 @@ namespace Content.Client.Lobby.UI
             // I.e., do what jobs/antags do.
 
             var guidebookController = UserInterfaceManager.GetUIController<GuidebookUIController>();
-            var species = Profile?.Species ?? SharedHumanoidAppearanceSystem.DefaultSpecies;
+            var species = Profile?.Species ?? HumanoidCharacterProfile.DefaultSpecies;
             var page = DefaultSpeciesGuidebook;
             if (_prototypeManager.HasIndex<GuideEntryPrototype>(species))
                 page = new ProtoId<GuideEntryPrototype>(species.Id); // Gross. See above todo comment.
@@ -1542,7 +1543,7 @@ namespace Content.Client.Lobby.UI
 
             try
             {
-                var profile = _entManager.System<HumanoidAppearanceSystem>().FromStream(file, _playerManager.LocalSession!);
+                var profile = HumanoidCharacterProfile.FromStream(file, _playerManager.LocalSession!);
                 var oldProfile = Profile;
                 SetProfile(profile, CharacterSlot);
 
@@ -1574,7 +1575,7 @@ namespace Content.Client.Lobby.UI
 
             try
             {
-                var dataNode = _entManager.System<HumanoidAppearanceSystem>().ToDataNode(Profile);
+                var dataNode = Profile.ToDataNode();
                 await using var writer = new StreamWriter(file.Value.fileStream);
                 dataNode.Write(writer);
             }

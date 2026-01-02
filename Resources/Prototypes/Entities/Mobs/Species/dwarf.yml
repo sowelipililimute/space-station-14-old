@@ -49,7 +49,7 @@
     accent: dwarf
   - type: Speech
     speechSounds: Bass
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Dwarf
     hideLayersOnEquip:
     - Hair

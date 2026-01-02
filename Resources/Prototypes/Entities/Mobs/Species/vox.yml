@@ -148,7 +148,7 @@
       sprite: "Effects/creampie.rsi"
       state: "creampie_vox" # Not default
       visible: false
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Vox
     undergarmentTop: UndergarmentTopTanktopVox
     undergarmentBottom: UndergarmentBottomBoxersVox
@@ -218,7 +218,7 @@
   id: MobVoxDummy
   categories: [ HideSpawnMenu ]
   components:
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Vox
     undergarmentTop: UndergarmentTopTanktopVox
     undergarmentBottom: UndergarmentBottomBoxersVox

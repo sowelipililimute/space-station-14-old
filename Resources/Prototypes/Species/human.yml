@@ -8,28 +8,8 @@
   dollPrototype: MobHumanDummy
   skinColoration: HumanToned
 # Offbrand start
-  ofmPrototype: OFMNuristBase
-  ofmOrgans:
-  - OFMOrganHumanTorso
-  - OFMOrganHumanHead
-  - OFMOrganHumanArmLeft
-  - OFMOrganHumanArmRight
-  - OFMOrganHumanHandLeft
-  - OFMOrganHumanHandRight
-  - OFMOrganHumanLegLeft
-  - OFMOrganHumanLegRight
-  - OFMOrganHumanFootLeft
-  - OFMOrganHumanFootRight
-  - OFMOrganHumanBrain
-  - OFMOrganHumanEyes
-  - OFMOrganHumanTongue
-  - OFMOrganHumanAppendix
-  - OFMOrganHumanEars
-  - OFMOrganHumanLungs
-  - OFMOrganHumanHeart
-  - OFMOrganHumanStomach
-  - OFMOrganHumanLiver
-  - OFMOrganHumanKidneys
+  ofmMobPrototype: OFMMobHuman
+  ofmAppearancePrototype: OFMAppearanceHuman
 # Offbrand end
 
 # The lack of a layer means that

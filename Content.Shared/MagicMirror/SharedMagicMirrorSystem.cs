@@ -50,7 +50,7 @@ public abstract class SharedMagicMirrorSystem : EntitySystem
     {
         var user = component.Target ?? args.User;
 
-        if (!HasComp<HumanoidAppearanceComponent>(user))
+        if (!HasComp<HumanoidProfileComponent>(user))
             args.Cancel();
     }
 

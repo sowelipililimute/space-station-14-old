@@ -1,6 +1,6 @@
 - type: entity
-  parent: OFMNuristBase
-  id: OFMVox
+  parent: OFMNuristAppearance
+  id: OFMAppearanceVox
   components:
   - type: Inventory
     speciesId: vox
@@ -56,6 +56,36 @@
         32:
           sprite: Mobs/Species/Vox/displacement.rsi
           state: hand_r
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganVoxTorso
+        - id: OFMOrganVoxHead
+        - id: OFMOrganVoxArmLeft
+        - id: OFMOrganVoxArmRight
+        - id: OFMOrganVoxHandRight
+        - id: OFMOrganVoxHandLeft
+        - id: OFMOrganVoxLegLeft
+        - id: OFMOrganVoxLegRight
+        - id: OFMOrganVoxFootLeft
+        - id: OFMOrganVoxFootRight
+        - id: OFMOrganVoxBrain
+        - id: OFMOrganVoxEyes
+        - id: OFMOrganVoxTongue
+        - id: OFMOrganVoxAppendix
+        - id: OFMOrganVoxEars
+        - id: OFMOrganVoxLungs
+        - id: OFMOrganVoxHeart
+        - id: OFMOrganVoxStomach
+        - id: OFMOrganVoxLiver
+        - id: OFMOrganVoxKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceVox
+  - OFMNuristMob
+  id: OFMMobVox
 
 - type: entity
   parent: OFMOrganBase

@@ -21,6 +21,8 @@ public sealed partial class OFMBodySystem : EntitySystem
 
         _bodyQuery = GetEntityQuery<OFMBodyComponent>();
         _organQuery = GetEntityQuery<OFMOrganComponent>();
+
+        InitializeRelay();
     }
 
     private void OnBodyInit(Entity<OFMBodyComponent> ent, ref ComponentInit args)

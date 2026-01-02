@@ -14,7 +14,8 @@
   sexes:
   - Unsexed
 # Offbrand start
-  ofmPrototype: OFMVox
+  ofmMobPrototype: OFMMobVox
+  ofmAppearancePrototype: OFMAppearanceVox
   ofmOrgans:
   - OFMOrganVoxTorso
   - OFMOrganVoxHead

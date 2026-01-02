@@ -1,12 +1,13 @@
 using Content.Shared._Offbrand.NuBody;
 using Content.Shared.Humanoid.Markings;
+using Content.Shared.Humanoid;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Shared.Utility;
 
 namespace Content.Client._Offbrand.NuBody;
 
-public sealed class OFMVisualBodySystem : EntitySystem
+public sealed class OFMVisualBodySystem : SharedOFMVisualBodySystem
 {
     [Dependency] private readonly SpriteSystem _sprite = default!;
     [Dependency] private readonly MarkingManager _marking = default!;
@@ -22,6 +23,8 @@ public sealed class OFMVisualBodySystem : EntitySystem
         SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, OrganGotInsertedEvent>(OnMarkingsGotInserted);
         SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, OrganGotRemovedEvent>(OnMarkingsGotRemoved);
         SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, AfterAutoHandleStateEvent>(OnMarkingsState);
+
+        SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, BodyRelayedEvent<HumanoidLayerVisibilityChangedEvent>>(OnMarkingsChangedVisibility);
     }
 
     private void OnOrganGotInserted(Entity<OFMVisualOrganComponent> ent, ref OrganGotInsertedEvent args)
@@ -75,6 +78,37 @@ public sealed class OFMVisualBodySystem : EntitySystem
 
         RemoveMarkings(ent, body);
         ApplyMarkings(ent, body);
+    }
+
+    protected override void SetOrganColor(Entity<OFMVisualOrganComponent> ent, Color color)
+    {
+        base.SetOrganColor(ent, color);
+
+        if (Comp<OFMOrganComponent>(ent).Body is not { } body)
+            return;
+
+        ApplyVisual(ent, body);
+    }
+
+    protected override void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, List<Marking> markings)
+    {
+        base.SetOrganMarkings(ent, markings);
+
+        if (Comp<OFMOrganComponent>(ent).Body is not { } body)
+            return;
+
+        RemoveMarkings(ent, body);
+        ApplyMarkings(ent, body);
+    }
+
+    protected override void SetOrganAppearance(Entity<OFMVisualOrganComponent> ent, PrototypeLayerData data)
+    {
+        base.SetOrganAppearance(ent, data);
+
+        if (Comp<OFMOrganComponent>(ent).Body is not { } body)
+            return;
+
+        ApplyVisual(ent, body);
     }
 
     private void ApplyMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, EntityUid target)
@@ -133,6 +167,34 @@ public sealed class OFMVisualBodySystem : EntitySystem
 
                 _sprite.LayerMapRemove(target, layerID);
                 _sprite.RemoveLayer(target, index);
+            }
+        }
+    }
+
+    private void OnMarkingsChangedVisibility(Entity<OFMVisualOrganMarkingsComponent> ent, ref BodyRelayedEvent<HumanoidLayerVisibilityChangedEvent> args)
+    {
+        Log.Debug($"organ {ToPrettyString(ent):ent} updating {args.Args.Layer} {args.Args.Visible}");
+
+        foreach (var marking in ent.Comp.Markings)
+        {
+            if (!_marking.TryGetMarking(marking, out var proto))
+                continue;
+
+            if (proto.BodyPart != args.Args.Layer)
+                continue;
+
+            foreach (var sprite in proto.Sprites)
+            {
+                DebugTools.Assert(sprite is SpriteSpecifier.Rsi);
+                if (sprite is not SpriteSpecifier.Rsi rsi)
+                    continue;
+
+                var layerID = $"{proto.ID}-{rsi.RsiState}";
+
+                if (!_sprite.LayerMapTryGet(args.Body.Owner, layerID, out var index, true))
+                    continue;
+
+                _sprite.LayerSetVisible(args.Body.Owner, index, args.Args.Visible);
             }
         }
     }

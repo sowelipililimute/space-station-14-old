@@ -4,15 +4,25 @@ using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Humanoid;
 using Content.Shared.Preferences;
 using Robust.Shared.Containers;
+using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._Offbrand.NuBody;
 
-public sealed partial class OFMBodySystem
+public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 {
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly MarkingManager _marking = default!;
+    [Dependency] private readonly SharedContainerSystem _container = default!;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+
+        SubscribeLocalEvent<OFMVisualOrganComponent, BodyRelayedEvent<OrganCopyAppearanceEvent>>(OnVisualOrganCopyAppearance);
+        SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, BodyRelayedEvent<OrganCopyAppearanceEvent>>(OnMarkingsOrganCopyAppearance);
+    }
 
     private List<Marking> ResolveMarkings(ProtoId<SpeciesPrototype> species, HumanoidCharacterProfile profile, HumanoidCharacterAppearance appearance)
     {
@@ -91,40 +101,52 @@ public sealed partial class OFMBodySystem
         return markingsSet.GetForwardEnumerator().ToList();
     }
 
-    public void SpawnRandomNurist(ProtoId<SpeciesPrototype> species, EntityCoordinates coordinates)
+    protected virtual void SetOrganColor(Entity<OFMVisualOrganComponent> ent, Color color)
     {
-        var speciesProto = _prototype.Index(species);
+        ent.Comp.Data.Color = color;
+        Dirty(ent);
+    }
 
-        var profile = HumanoidCharacterProfile.RandomWithSpecies(species);
-        var appearance = profile.Appearance;
+    protected virtual void SetOrganAppearance(Entity<OFMVisualOrganComponent> ent, PrototypeLayerData data)
+    {
+        ent.Comp.Data = data;
+        Dirty(ent);
+    }
 
-        var humanoid = EntityManager.CreateEntityUninitialized(speciesProto.OFMPrototype, coordinates);
-        var organContainer = _container.EnsureContainer<Container>(humanoid, OFMBodyComponent.ContainerID);
+    protected virtual void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, List<Marking> markings)
+    {
+        ent.Comp.Markings = markings;
+        Dirty(ent);
+    }
 
-        var debug = EnsureComp<OFMDebugAppearanceComponent>(humanoid);
-        debug.Appearance = appearance;
-        Dirty(humanoid, debug);
+    public void ApplyProfileTo(Entity<OFMBodyComponent?> ent, HumanoidCharacterProfile profile)
+    {
+        if (!Resolve(ent, ref ent.Comp))
+            return;
 
-        var markings = ResolveMarkings(species, profile, appearance);
+        var organContainer = _container.EnsureContainer<Container>(ent, OFMBodyComponent.ContainerID);
+        var markings = ResolveMarkings(profile.Species, profile, profile.Appearance);
+
+        var debug = EnsureComp<OFMDebugAppearanceComponent>(ent);
+        debug.Appearance = profile.Appearance.Clone();
+        Dirty(ent, debug);
+
         debug.Appearance.Markings = markings;
 
-        foreach (var organProto in speciesProto.OFMOrgans)
+        foreach (var organ in organContainer.ContainedEntities)
         {
-            var organ = EntityManager.CreateEntityUninitialized(organProto);
-            EntityManager.InitializeAndStartEntity(organ);
-
             if (TryComp<OFMVisualOrganComponent>(organ, out var visualOrgan))
             {
                 if (visualOrgan.Layer.Equals(HumanoidVisualLayers.Eyes))
-                    visualOrgan.Data.Color = appearance.EyeColor;
+                    SetOrganColor((organ, visualOrgan), profile.Appearance.EyeColor);
                 else
-                    visualOrgan.Data.Color = appearance.SkinColor;
-
-                Dirty(organ, visualOrgan);
+                    SetOrganColor((organ, visualOrgan), profile.Appearance.SkinColor);
             }
 
             if (TryComp<OFMVisualOrganMarkingsComponent>(organ, out var visualOrganMarkings))
             {
+                var organMarkings = new List<Marking>();
+
                 foreach (var marking in markings)
                 {
                     if (!_marking.TryGetMarking(marking, out var proto))
@@ -133,18 +155,74 @@ public sealed partial class OFMBodySystem
                     if (!visualOrganMarkings.Layers.Contains(proto.BodyPart))
                         continue;
 
-                    if (_marking.CanBeApplied(species, profile.Sex, proto, _prototype))
+                    if (_marking.CanBeApplied(profile.Species, profile.Sex, proto, _prototype))
                     {
-                        visualOrganMarkings.Markings.Add(marking);
+                        organMarkings.Add(marking);
                     }
                 }
 
-                Dirty(organ, visualOrganMarkings);
+                SetOrganMarkings((organ, visualOrganMarkings), organMarkings);
             }
-
-            _container.Insert(organ, organContainer);
         }
+    }
 
+    public void CopyAppearanceFrom(Entity<OFMBodyComponent?> source, Entity<OFMBodyComponent?> target)
+    {
+        if (!Resolve(source, ref source.Comp) || !Resolve(target, ref target.Comp))
+            return;
+
+        var sourceOrgans = _container.EnsureContainer<Container>(source, OFMBodyComponent.ContainerID);
+
+        foreach (var sourceOrgan in sourceOrgans.ContainedEntities)
+        {
+            var evt = new OrganCopyAppearanceEvent(sourceOrgan);
+            RaiseLocalEvent(target, ref evt);
+        }
+    }
+
+    [Dependency] private readonly Content.Shared.Humanoid.HumanoidProfileSystem _humanoidProfile = default!;
+    [Dependency] private readonly MetaDataSystem _metaData = default!;
+
+    public void SpawnRandomNurist(ProtoId<SpeciesPrototype> species, EntityCoordinates coordinates)
+    {
+        var speciesProto = _prototype.Index(species);
+
+        var profile = HumanoidCharacterProfile.RandomWithSpecies(species);
+
+        var humanoid = EntityManager.CreateEntityUninitialized(speciesProto.OFMMobPrototype, coordinates);
         EntityManager.InitializeAndStartEntity(humanoid);
+
+        ApplyProfileTo((humanoid, Comp<OFMBodyComponent>(humanoid)), profile);
+
+        _humanoidProfile.ApplyProfileTo(humanoid, profile);
+        _metaData.SetEntityName(humanoid, profile.Name);
+    }
+
+    private void OnVisualOrganCopyAppearance(Entity<OFMVisualOrganComponent> ent, ref BodyRelayedEvent<OrganCopyAppearanceEvent> args)
+    {
+        if (!TryComp<OFMVisualOrganComponent>(args.Args.Organ, out var other))
+            return;
+
+        if (!other.Layer.Equals(ent.Comp.Layer))
+            return;
+
+        SetOrganAppearance(ent, other.Data);
+    }
+
+    private void OnMarkingsOrganCopyAppearance(Entity<OFMVisualOrganMarkingsComponent> ent, ref BodyRelayedEvent<OrganCopyAppearanceEvent> args)
+    {
+        if (!TryComp<OFMVisualOrganMarkingsComponent>(args.Args.Organ, out var other))
+            return;
+
+        if (!other.Layers.SetEquals(ent.Comp.Layers))
+            return;
+
+        SetOrganMarkings(ent, other.Markings);
     }
 }
+
+/// <summary>
+/// Raised on body entity, when an organ is having its appearance copied to it
+/// </summary>
+[ByRefEvent]
+public readonly record struct OrganCopyAppearanceEvent(EntityUid Organ);

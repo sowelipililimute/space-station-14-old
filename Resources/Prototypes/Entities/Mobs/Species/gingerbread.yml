@@ -5,7 +5,7 @@
   id: BaseMobGingerbread
   abstract: true
   components:
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Gingerbread
   - type: Icon
     sprite: Mobs/Species/Gingerbread/parts.rsi
@@ -63,7 +63,7 @@
   id: MobGingerbreadDummy
   categories: [ HideSpawnMenu ]
   components:
-  - type: HumanoidAppearance
+  - type: HumanoidProfile
     species: Gingerbread
   - type: Inventory
     femaleDisplacements:

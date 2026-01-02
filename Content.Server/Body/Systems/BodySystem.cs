@@ -20,7 +20,7 @@ public sealed class BodySystem : SharedBodySystem
 {
     [Dependency] private readonly GhostSystem _ghostSystem = default!;
     [Dependency] private readonly IGameTiming _gameTiming = default!;
-    [Dependency] private readonly HumanoidAppearanceSystem _humanoidSystem = default!;
+    // [Dependency] private readonly HumanoidAppearanceSystem _humanoidSystem = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
     [Dependency] private readonly SharedMindSystem _mindSystem = default!;
 
@@ -65,13 +65,6 @@ public sealed class BodySystem : SharedBodySystem
     {
         // TODO: Predict this probably.
         base.AddPart(bodyEnt, partEnt, slotId);
-
-        var layer = partEnt.Comp.ToHumanoidLayers();
-        if (layer != null)
-        {
-            var layers = HumanoidVisualLayersExtension.Sublayers(layer.Value);
-            _humanoidSystem.SetLayersVisibility(bodyEnt.Owner, layers, visible: true);
-        }
     }
 
     protected override void RemovePart(
@@ -80,16 +73,5 @@ public sealed class BodySystem : SharedBodySystem
         string slotId)
     {
         base.RemovePart(bodyEnt, partEnt, slotId);
-
-        if (!TryComp<HumanoidAppearanceComponent>(bodyEnt, out var humanoid))
-            return;
-
-        var layer = partEnt.Comp.ToHumanoidLayers();
-
-        if (layer is null)
-            return;
-
-        var layers = HumanoidVisualLayersExtension.Sublayers(layer.Value);
-        _humanoidSystem.SetLayersVisibility((bodyEnt, humanoid), layers, visible: false);
     }
 }

@@ -3,6 +3,7 @@ using Content.Server.Humanoid;
 using Content.Server.Mind;
 using Content.Server.PDA;
 using Content.Server.Station.Components;
+using Content.Shared._Offbrand.NuBody;
 using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
 using Content.Shared.CCVar;
@@ -36,7 +37,8 @@ public sealed class StationSpawningSystem : SharedStationSpawningSystem
     [Dependency] private readonly ActorSystem _actors = default!;
     [Dependency] private readonly IdCardSystem _cardSystem = default!;
     [Dependency] private readonly IConfigurationManager _configurationManager = default!;
-    [Dependency] private readonly HumanoidAppearanceSystem _humanoidSystem = default!;
+    [Dependency] private readonly HumanoidProfileSystem _humanoidProfile = default!;
+    [Dependency] private readonly SharedOFMVisualBodySystem _visualBody = default!;
     [Dependency] private readonly IdentitySystem _identity = default!;
     [Dependency] private readonly MetaDataSystem _metaSystem = default!;
     [Dependency] private readonly PdaSystem _pdaSystem = default!;
@@ -124,16 +126,17 @@ public sealed class StationSpawningSystem : SharedStationSpawningSystem
             return jobEntity;
         }
 
-        string speciesId = profile != null ? profile.Species : SharedHumanoidAppearanceSystem.DefaultSpecies;
+        string speciesId = profile != null ? profile.Species : HumanoidCharacterProfile.DefaultSpecies;
 
         if (!_prototypeManager.TryIndex<SpeciesPrototype>(speciesId, out var species))
             throw new ArgumentException($"Invalid species prototype was used: {speciesId}");
 
-        entity ??= Spawn(species.Prototype, coordinates);
+        entity ??= Spawn(species.OFMMobPrototype, coordinates);
 
         if (profile != null)
         {
-            _humanoidSystem.LoadProfile(entity.Value, profile);
+            _visualBody.ApplyProfileTo(entity.Value, profile);
+            _humanoidProfile.ApplyProfileTo(entity.Value, profile);
             _metaSystem.SetEntityName(entity.Value, profile.Name);
 
             if (profile.FlavorText != "" && _configurationManager.GetCVar(CCVars.FlavorText))

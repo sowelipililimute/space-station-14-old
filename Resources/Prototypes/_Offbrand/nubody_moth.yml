@@ -1,6 +1,6 @@
 - type: entity
-  parent: OFMNuristBase
-  id: OFMMoth
+  parent: OFMNuristAppearance
+  id: OFMAppearanceMoth
   components:
   - type: Inventory
     speciesId: moth
@@ -56,6 +56,36 @@
           32:
             sprite: Mobs/Species/Moth/displacement.rsi
             state: shoes
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganMothTorso
+        - id: OFMOrganMothHead
+        - id: OFMOrganMothArmLeft
+        - id: OFMOrganMothArmRight
+        - id: OFMOrganMothHandRight
+        - id: OFMOrganMothHandLeft
+        - id: OFMOrganMothLegLeft
+        - id: OFMOrganMothLegRight
+        - id: OFMOrganMothFootLeft
+        - id: OFMOrganMothFootRight
+        - id: OFMOrganMothBrain
+        - id: OFMOrganMothEyes
+        - id: OFMOrganMothTongue
+        - id: OFMOrganMothAppendix
+        - id: OFMOrganMothEars
+        - id: OFMOrganMothLungs
+        - id: OFMOrganMothHeart
+        - id: OFMOrganMothStomach
+        - id: OFMOrganMothLiver
+        - id: OFMOrganMothKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceMoth
+  - OFMNuristMob
+  id: OFMMobMoth
 
 - type: entity
   parent: OFMOrganBase

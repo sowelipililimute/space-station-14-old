@@ -1,4 +1,46 @@
 - type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceHuman
+  components:
+  - type: Inventory
+    femaleDisplacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Human/displacement.rsi
+            state: jumpsuit-female
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganHumanTorso
+        - id: OFMOrganHumanHead
+        - id: OFMOrganHumanArmLeft
+        - id: OFMOrganHumanArmRight
+        - id: OFMOrganHumanHandRight
+        - id: OFMOrganHumanHandLeft
+        - id: OFMOrganHumanLegLeft
+        - id: OFMOrganHumanLegRight
+        - id: OFMOrganHumanFootLeft
+        - id: OFMOrganHumanFootRight
+        - id: OFMOrganHumanBrain
+        - id: OFMOrganHumanEyes
+        - id: OFMOrganHumanTongue
+        - id: OFMOrganHumanAppendix
+        - id: OFMOrganHumanEars
+        - id: OFMOrganHumanLungs
+        - id: OFMOrganHumanHeart
+        - id: OFMOrganHumanStomach
+        - id: OFMOrganHumanLiver
+        - id: OFMOrganHumanKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceHuman
+  - OFMNuristMob
+  id: OFMMobHuman
+
+- type: entity
   parent: OFMOrganBase
   id: OFMOrganHuman
   abstract: true

@@ -12,7 +12,8 @@
   femaleFirstNames: NamesMothFirstFemale
   lastNames: NamesMothLast
 # Offbrand start
-  ofmPrototype: OFMMoth
+  ofmMobPrototype: OFMMobMoth
+  ofmAppearancePrototype: OFMAppearanceMoth
   ofmOrgans:
   - OFMOrganMothTorso
   - OFMOrganMothHead

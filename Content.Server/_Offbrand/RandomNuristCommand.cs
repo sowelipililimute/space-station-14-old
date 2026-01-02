@@ -18,7 +18,7 @@ public sealed class NuristCommands : ToolshedCommand
     [CommandImplementation("random")]
     public void Random([CommandArgument] ProtoId<SpeciesPrototype> proto, [CommandArgument(unparseable:true)] EntityCoordinates target)
     {
-        _entity.System<OFMBodySystem>().SpawnRandomNurist(proto, target);
+        _entity.System<SharedOFMVisualBodySystem>().SpawnRandomNurist(proto, target);
     }
 
     [CommandImplementation("insert_organ")]

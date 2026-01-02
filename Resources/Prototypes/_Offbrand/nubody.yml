@@ -1,12 +1,4 @@
 - type: entity
-  id: OFMBody
-  name: body
-  suffix: OFM
-  abstract: true
-  components:
-  - type: OFMBody
-
-- type: entity
   id: OFMOrganBase
   name: organ
   suffix: OFM
@@ -84,11 +76,35 @@
       visible: false
 
 - type: entity
-  id: OFMNuristBase
+  id: OFMNuristAppearance
+  parent:
+  - InventoryBase
+  - OFMBodyLayers
+  abstract: true
+  components:
+  - type: OFMBody
+  - type: HumanoidProfile
+  - type: Hands
+  - type: ComplexInteraction
+  - type: ContainerContainer
+  - type: Appearance
+  - type: HideableHumanoidLayers
+    hideLayersOnEquip:
+    - Snout
+    - SnoutCover
+    - HeadTop
+    - HeadSide
+    - FacialHair
+    - Hair
+  - type: UserInterface
+    interfaces:
+      enum.HumanoidMarkingModifierKey.Key:
+        type: HumanoidMarkingModifierBoundUserInterface
+
+- type: entity
+  id: OFMNuristMob
   parent:
   - BaseMob
-  - OFMBody
-  - OFMBodyLayers
 
   - MobCombat
   - MobDamageable
@@ -97,6 +113,9 @@
   - MobRespirator
   - MobAtmosStandard
   - MobFlammable
+
+  - OFMNuristAppearance
+  abstract: true
   components:
   - type: StatusIcon
     bounds: -0.5,-0.5,0.5,0.5
