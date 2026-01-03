@@ -26,79 +26,52 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 
     private List<Marking> ResolveMarkings(ProtoId<SpeciesPrototype> species, HumanoidCharacterProfile profile, HumanoidCharacterAppearance appearance)
     {
-        var markingsSet = new MarkingSet();
-
-        var speciesProto = _prototype.Index(species);
-        var pointsProto = _prototype.Index(speciesProto.MarkingPoints);
-        markingsSet.Points = MarkingPoints.CloneMarkingPointDictionary(pointsProto.Points);
-
-        // General markings
-        var forcedColorMarkings = new List<(Marking, MarkingPrototype)>();
-        foreach (var marking in appearance.Markings)
-        {
-            if (!_marking.TryGetMarking(marking, out var proto))
-                continue;
-
-            // Anything with forced colouring needs to be added after everything else is situated
-            if (!proto.ForcedColoring)
-            {
-                markingsSet.AddBack(proto.MarkingCategory, marking);
-            }
-            else
-            {
-                forcedColorMarkings.Add((marking, proto));
-            }
-        }
-
-        // Hair & facial hair (I hate this)
-
-        var facialHairColor = _marking.MustMatchSkin(species, HumanoidVisualLayers.FacialHair, out var facialHairAlpha, _prototype)
-            ? appearance.SkinColor.WithAlpha(facialHairAlpha)
-            : appearance.FacialHairColor;
-
-        var facialHair = new Marking(appearance.FacialHairStyleId,
-            new[] { facialHairColor });
-
-        if (_marking.TryGetMarking(facialHair, out var facialProto) &&
-            _marking.CanBeApplied(species, profile.Sex, facialProto, _prototype))
-        {
-            markingsSet.AddBack(facialProto.MarkingCategory, facialHair);
-        }
-
-        var hairColor = _marking.MustMatchSkin(species, HumanoidVisualLayers.Hair, out var hairAlpha, _prototype)
-            ? appearance.SkinColor.WithAlpha(hairAlpha)
-            : appearance.HairColor;
-
-        var hair = new Marking(appearance.HairStyleId,
-            new[] { hairColor });
-
-        if (_marking.TryGetMarking(hair, out var hairProto) &&
-            _marking.CanBeApplied(species, profile.Sex, hairProto, _prototype))
-        {
-            markingsSet.AddBack(hairProto.MarkingCategory, hair);
-        }
-
-        // Ensure the species of this adds up
-        markingsSet.EnsureSpecies(species, appearance.SkinColor, _marking, _prototype);
-
-        // Now we go through forced colour markings
-        foreach (var (marking, prototype) in forcedColorMarkings)
-        {
-            var colors = MarkingColoring.GetMarkingLayerColors(
-                prototype,
-                appearance.SkinColor,
-                appearance.EyeColor,
-                markingsSet
-            );
-
-            var markingWithColor = new Marking(marking.MarkingId, colors);
-            markingsSet.AddBack(prototype.MarkingCategory, markingWithColor);
-        }
-
-        // Now we ensure defaults
-        markingsSet.EnsureDefault(appearance.SkinColor, appearance.EyeColor, _marking);
-
-        return markingsSet.GetForwardEnumerator().ToList();
+        return new();
+        // var markingsSet = new MarkingSet();
+        //
+        // var speciesProto = _prototype.Index(species);
+        // var pointsProto = _prototype.Index(speciesProto.MarkingPoints);
+        // markingsSet.Points = MarkingPoints.CloneMarkingPointDictionary(pointsProto.Points);
+        //
+        // // General markings
+        // var forcedColorMarkings = new List<(Marking, MarkingPrototype)>();
+        // foreach (var marking in appearance.Markings)
+        // {
+        //     if (!_marking.TryGetMarking(marking, out var proto))
+        //         continue;
+        //
+        //     // Anything with forced colouring needs to be added after everything else is situated
+        //     if (!proto.ForcedColoring)
+        //     {
+        //         markingsSet.AddBack(proto.MarkingCategory, marking);
+        //     }
+        //     else
+        //     {
+        //         forcedColorMarkings.Add((marking, proto));
+        //     }
+        // }
+        //
+        // // Ensure the species of this adds up
+        // markingsSet.EnsureSpecies(species, appearance.SkinColor, _marking, _prototype);
+        //
+        // // Now we go through forced colour markings
+        // foreach (var (marking, prototype) in forcedColorMarkings)
+        // {
+        //     var colors = MarkingColoring.GetMarkingLayerColors(
+        //         prototype,
+        //         appearance.SkinColor,
+        //         appearance.EyeColor,
+        //         markingsSet
+        //     );
+        //
+        //     var markingWithColor = new Marking(marking.MarkingId, colors);
+        //     markingsSet.AddBack(prototype.MarkingCategory, markingWithColor);
+        // }
+        //
+        // // Now we ensure defaults
+        // markingsSet.EnsureDefault(appearance.SkinColor, appearance.EyeColor, _marking);
+        //
+        // return markingsSet.GetForwardEnumerator().ToList();
     }
 
     protected virtual void SetOrganColor(Entity<OFMVisualOrganComponent> ent, Color color)
@@ -125,16 +98,12 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
             return;
 
         var organContainer = _container.EnsureContainer<Container>(ent, OFMBodyComponent.ContainerID);
-        var markings = ResolveMarkings(profile.Species, profile, profile.Appearance);
-
-        var debug = EnsureComp<OFMDebugAppearanceComponent>(ent);
-        debug.Appearance = profile.Appearance.Clone();
-        Dirty(ent, debug);
-
-        debug.Appearance.Markings = markings;
 
         foreach (var organ in organContainer.ContainedEntities)
         {
+            if (!TryComp<OFMOrganComponent>(organ, out var organComp) || organComp.Category is not { } category)
+                continue;
+
             if (TryComp<OFMVisualOrganComponent>(organ, out var visualOrgan))
             {
                 if (visualOrgan.Layer.Equals(HumanoidVisualLayers.Eyes))
@@ -143,7 +112,8 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
                     SetOrganColor((organ, visualOrgan), profile.Appearance.SkinColor);
             }
 
-            if (TryComp<OFMVisualOrganMarkingsComponent>(organ, out var visualOrganMarkings))
+            if (TryComp<OFMVisualOrganMarkingsComponent>(organ, out var visualOrganMarkings) &&
+                profile.Appearance.Markings.TryGetValue(category, out var markings))
             {
                 var organMarkings = new List<Marking>();
 
@@ -155,7 +125,7 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
                     if (!visualOrganMarkings.Layers.Contains(proto.BodyPart))
                         continue;
 
-                    if (_marking.CanBeApplied(profile.Species, profile.Sex, proto, _prototype))
+                    if (_marking.CanBeApplied(visualOrganMarkings.Group, profile.Sex, proto))
                     {
                         organMarkings.Add(marking);
                     }

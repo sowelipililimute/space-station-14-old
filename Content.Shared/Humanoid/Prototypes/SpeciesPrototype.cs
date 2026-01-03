@@ -1,3 +1,4 @@
+using Content.Shared._Offbrand.NuBody;
 using Content.Shared.Dataset;
 using Content.Shared.Humanoid.Markings;
 using Robust.Shared.Prototypes;
@@ -43,9 +44,6 @@ public sealed partial class SpeciesPrototype : IPrototype
     // sprite layout, and leave this null. Keep in mind that this will disable
     // sprite accessories.
 
-    [DataField("sprites")]
-    public ProtoId<HumanoidSpeciesBaseSpritesPrototype> SpriteSet { get; private set; } = default!;
-
     /// <summary>
     ///     Default skin tone for this species. This applies for non-human skin tones.
     /// </summary>
@@ -59,24 +57,24 @@ public sealed partial class SpeciesPrototype : IPrototype
     [DataField]
     public int DefaultHumanSkinTone { get; private set; } = 20;
 
-    /// <summary>
-    ///     The limit of body markings that you can place on this species.
-    /// </summary>
-    [DataField("markingLimits")]
-    public ProtoId<MarkingPointsPrototype> MarkingPoints { get; private set; } = default!;
-
     // Begin Offbrand
     /// <summary>
     /// Prototype used by the species for OFMBody, includes all mob functionalities
     /// </summary>
-    [DataField("ofmMobPrototype")]
+    [DataField("mobPrototype")]
     public EntProtoId OFMMobPrototype = default!;
 
     /// <summary>
     /// Prototype used by the species for OFMBody, visuals only
     /// </summary>
-    [DataField("ofmAppearancePrototype")]
+    [DataField("appearancePrototype")]
     public EntProtoId OFMAppearancePrototype = default!;
+
+    /// <summary>
+    /// Organs that spawn into the species (TODO do not merge with)
+    /// </summary>
+    [DataField]
+    public Dictionary<ProtoId<OrganCategoryPrototype>, EntProtoId<OFMOrganComponent>> Organs = default!;
     // End Offbrand
 
     /// <summary>

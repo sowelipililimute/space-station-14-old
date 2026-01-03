@@ -253,13 +253,16 @@
   name: torso
   abstract: true
   components:
+  - type: OFMOrgan
+    category: Torso
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.Chest
     data:
       state: torso_m
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.Tail
+    - Chest
+    - Tail
 
 - type: entity
   parent: OFMOrganBase
@@ -267,19 +270,21 @@
   name: head
   abstract: true
   components:
+  - type: OFMOrgan
+    category: Head
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.Head
     data:
       state: head_m
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.Head
-    - enum.HumanoidVisualLayers.Hair
-    - enum.HumanoidVisualLayers.FacialHair
-    - enum.HumanoidVisualLayers.Snout
-    - enum.HumanoidVisualLayers.SnoutCover
-    - enum.HumanoidVisualLayers.HeadSide
-    - enum.HumanoidVisualLayers.HeadTop
+    - Head
+    - Hair
+    - FacialHair
+    - Snout
+    - SnoutCover
+    - HeadSide
+    - HeadTop
 
 - type: entity
   parent: OFMOrganBase
@@ -287,13 +292,15 @@
   name: left arm
   abstract: true
   components:
+  - type: OFMOrgan
+    category: ArmLeft
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.LArm
     data:
       state: l_arm
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.LArm
+    - LArm
 
 - type: entity
   parent: OFMOrganBase
@@ -301,13 +308,15 @@
   name: right arm
   abstract: true
   components:
+  - type: OFMOrgan
+    category: ArmRight
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.RArm
     data:
       state: r_arm
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.RArm
+    - RArm
 
 - type: entity
   parent: OFMOrganBase
@@ -315,6 +324,8 @@
   name: left hand
   abstract: true
   components:
+  - type: OFMOrgan
+    category: HandLeft
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.LHand
     data:
@@ -325,7 +336,7 @@
       location: Left
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.LHand
+    - LHand
 
 - type: entity
   parent: OFMOrganBase
@@ -333,6 +344,8 @@
   name: right hand
   abstract: true
   components:
+  - type: OFMOrgan
+    category: HandRight
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.RHand
     data:
@@ -343,7 +356,7 @@
       location: Right
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.RHand
+    - RHand
 
 - type: entity
   parent: OFMOrganBase
@@ -351,13 +364,15 @@
   name: left leg
   abstract: true
   components:
+  - type: OFMOrgan
+    category: LegLeft
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.LLeg
     data:
       state: l_leg
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.LLeg
+    - LLeg
 
 - type: entity
   parent: OFMOrganBase
@@ -365,13 +380,15 @@
   name: right leg
   abstract: true
   components:
+  - type: OFMOrgan
+    category: LegRight
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.RLeg
     data:
       state: r_leg
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.RLeg
+    - RLeg
 
 - type: entity
   parent: OFMOrganBase
@@ -379,32 +396,40 @@
   name: left foot
   abstract: true
   components:
+  - type: OFMOrgan
+    category: FootLeft
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.LFoot
     data:
       state: l_foot
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.LFoot
+    - LFoot
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseFootRight
   name: right foot
   components:
+  - type: OFMOrgan
+    category: FootRight
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.RFoot
     data:
       state: r_foot
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.RFoot
+    - RFoot
+
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseBrain
   name: brain
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Brain
 
 - type: entity
   parent: OFMOrganBase
@@ -412,6 +437,8 @@
   name: eyes
   abstract: true
   components:
+  - type: OFMOrgan
+    category: Eyes
   - type: OFMVisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
@@ -419,52 +446,76 @@
       state: eyes
   - type: OFMVisualOrganMarkings
     layers:
-    - enum.HumanoidVisualLayers.Eyes
+    - Eyes
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseTongue
   name: tongue
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Tongue
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseAppendix
   name: appendix
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Appendix
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseEars
   name: ears
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Ears
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseLungs
   name: lungs
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Lungs
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseHeart
   name: heart
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Heart
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseStomach
   name: stomach
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Stomach
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseLiver
   name: liver
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Liver
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseKidneys
   name: kidneys
   abstract: true
+  components:
+  - type: OFMOrgan
+    category: Kidneys
