@@ -204,120 +204,169 @@ public sealed class MarkingManager
     }
 
     /// <summary>
-    /// Ensures that the <see cref="markings"/> have a valid amount of colors
+    /// Ensures that the <see cref="markingSets"/> have a valid amount of colors
     /// </summary>
-    public void EnsureValidColors(List<Marking> markings)
+    public void EnsureValidColors(Dictionary<HumanoidVisualLayers, List<Marking>> markingSets)
     {
-        for (var i = markings.Count - 1; i >= 0; i--)
+        foreach (var markings in markingSets.Values)
         {
-            if (!TryGetMarking(markings[i], out var marking))
+            for (var i = markings.Count - 1; i >= 0; i--)
             {
-                markings.RemoveAt(i);
-                continue;
-            }
+                if (!TryGetMarking(markings[i], out var marking))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
 
-            if (marking.Sprites.Count != markings[i].MarkingColors.Count)
-            {
-                markings[i] = new Marking(marking.ID, marking.Sprites.Count);
+                if (marking.Sprites.Count != markings[i].MarkingColors.Count)
+                {
+                    markings[i] = new Marking(marking.ID, marking.Sprites.Count);
+                }
             }
         }
     }
 
     /// <summary>
-    /// Ensures that the markings are valid per the constraints on <see cref="group"/> and <see cref="sex"/>
+    /// Ensures that the <see cref="markingSets"/> are valid per the constraints on <see cref="group"/> and <see cref="sex"/>
     /// </summary>
-    public void EnsureValidGroupAndSex(List<Marking> markings, ProtoId<MarkingsGroupPrototype> group, Sex sex)
+    public void EnsureValidGroupAndSex(Dictionary<HumanoidVisualLayers, List<Marking>> markingSets, ProtoId<MarkingsGroupPrototype> group, Sex sex)
     {
-        for (var i = markings.Count - 1; i >= 0; i--)
+        foreach (var markings in markingSets.Values)
         {
-            if (!TryGetMarking(markings[i], out var marking))
+            for (var i = markings.Count - 1; i >= 0; i--)
             {
-                markings.RemoveAt(i);
-                continue;
-            }
+                if (!TryGetMarking(markings[i], out var marking))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
 
-            if (!CanBeApplied(group, sex, marking))
-            {
-                markings.RemoveAt(i);
-                continue;
+                if (!CanBeApplied(group, sex, marking))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
             }
         }
     }
 
     /// <summary>
-    /// Ensures that the <see cref="markings"/> only belong to the <see cref="layers"/>
+    /// Ensures that the <see cref="markingSets"/> only belong to the <see cref="layers"/>
     /// </summary>
-    public void EnsureValidLayers(List<Marking> markings, HashSet<HumanoidVisualLayers> layers)
+    public void EnsureValidLayers(Dictionary<HumanoidVisualLayers, List<Marking>> markingSets, HashSet<HumanoidVisualLayers> layers)
     {
-        for (var i = markings.Count - 1; i >= 0; i--)
+        foreach (var markings in markingSets.Values)
         {
-            if (!TryGetMarking(markings[i], out var marking))
+            for (var i = markings.Count - 1; i >= 0; i--)
             {
-                markings.RemoveAt(i);
-                continue;
-            }
+                if (!TryGetMarking(markings[i], out var marking))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
 
-            if (!layers.Contains(marking.BodyPart))
-            {
-                markings.RemoveAt(i);
-                continue;
+                if (!layers.Contains(marking.BodyPart))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
             }
         }
     }
 
     /// <summary>
-    /// Ensures the list of <see cref="markings"/> is valid per the limits of the <see cref="group"/>
+    /// Ensures the list of <see cref="markingSets"/> is valid per the limits of the <see cref="group"/>
     /// </summary>
-    public void EnsureValidLimits(List<Marking> markings, ProtoId<MarkingsGroupPrototype> group, HashSet<HumanoidVisualLayers> layers, Color? skinColor, Color? eyeColor)
+    public void EnsureValidLimits(Dictionary<HumanoidVisualLayers, List<Marking>> markingSets, ProtoId<MarkingsGroupPrototype> group, HashSet<HumanoidVisualLayers> layers, Color? skinColor, Color? eyeColor)
     {
         var groupProto = _prototype.Index(group);
         var counts = new Dictionary<HumanoidVisualLayers, int>();
 
-        for (var i = markings.Count - 1; i >= 0; i--)
+        foreach (var (layer, markings) in markingSets)
         {
-            if (!TryGetMarking(markings[i], out var marking))
+            for (var i = markings.Count - 1; i >= 0; i--)
             {
-                markings.RemoveAt(i);
-                continue;
+                if (!TryGetMarking(markings[i], out var marking))
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
+
+                if (!groupProto.Limits.TryGetValue(marking.BodyPart, out var limit))
+                    continue;
+
+                var count = counts.GetValueOrDefault(marking.BodyPart);
+                if (count >= limit.Limit)
+                {
+                    markings.RemoveAt(i);
+                    continue;
+                }
+
+                counts[marking.BodyPart] = counts.GetValueOrDefault(marking.BodyPart) + 1;
             }
-
-            if (!groupProto.Limits.TryGetValue(marking.BodyPart, out var limit))
-                continue;
-
-            var count = counts.GetValueOrDefault(marking.BodyPart);
-            if (count >= limit.Limit)
-            {
-                markings.RemoveAt(i);
-                continue;
-            }
-
-            counts[marking.BodyPart] = counts.GetValueOrDefault(marking.BodyPart) + 1;
         }
 
         foreach (var layer in layers)
         {
-            if (!groupProto.Limits.TryGetValue(layer, out var limit))
+            if (!groupProto.Limits.TryGetValue(layer, out var layerLimit))
                 continue;
 
-            var count = counts.GetValueOrDefault(layer);
-            if (count > 0 || !limit.Required)
+            var layerCounts = counts.GetValueOrDefault(layer);
+            if (layerCounts > 0 || !layerLimit.Required)
                 continue;
 
-            foreach (var marking in limit.Default)
+            foreach (var marking in layerLimit.Default)
             {
                 if (!_markings.TryGetValue(marking, out var markingProto))
                     continue;
 
-                var colors = MarkingColoring.GetMarkingLayerColors(markingProto, skinColor, eyeColor);
-                markings.Add(new(marking, colors));
+                markingSets[layer] = markingSets.GetValueOrDefault(layer) ?? [];
+                var colors = MarkingColoring.GetMarkingLayerColors(markingProto, skinColor, eyeColor, markingSets[layer]);
+                markingSets[layer].Add(new(marking, colors));
             }
         }
     }
 
-    public bool TryGetMarkingData(EntProtoId organ, [NotNullWhen(true)] out HashSet<HumanoidVisualLayers>? layers, [NotNullWhen(true)] out ProtoId<MarkingsGroupPrototype>? group)
+    public Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData> GetMarkingData(ProtoId<SpeciesPrototype> species)
     {
-        layers = null;
-        group = null;
+        var ret = new Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData>();
+        var speciesPrototype = _prototype.Index(species);
+
+        foreach (var (organ, proto) in speciesPrototype.Organs)
+        {
+            if (!TryGetMarkingData(proto, out var organData))
+                continue;
+
+            ret[organ] = organData.Value;
+        }
+
+        return ret;
+    }
+
+    public Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData> GetProfileData(ProtoId<SpeciesPrototype> species,
+        Sex sex,
+        Color skinColor,
+        Color eyeColor)
+    {
+        var ret = new Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData>();
+        var speciesPrototype = _prototype.Index(species);
+
+        foreach (var organ in speciesPrototype.Organs.Keys)
+        {
+            ret[organ] = new()
+            {
+                Sex = sex,
+                EyeColor = eyeColor,
+                SkinColor = skinColor,
+            };
+        }
+
+        return ret;
+    }
+
+    public bool TryGetMarkingData(EntProtoId organ, [NotNullWhen(true)] out OrganMarkingData? organData)
+    {
+        organData = null;
 
         if (!_prototype.TryIndex(organ, out var organProto))
             return false;
@@ -325,8 +374,7 @@ public sealed class MarkingManager
         if (!organProto.TryGetComponent<OFMVisualOrganMarkingsComponent>(out var comp, _component))
             return false;
 
-        layers = comp.Layers;
-        group = comp.Group;
+        organData = comp.MarkingData;
 
         return true;
     }

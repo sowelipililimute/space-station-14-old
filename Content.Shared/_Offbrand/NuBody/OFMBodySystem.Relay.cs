@@ -6,6 +6,8 @@ public sealed partial class OFMBodySystem
 {
     private void InitializeRelay()
     {
+        SubscribeLocalEvent<OFMBodyComponent, ApplyOrganProfileDataEvent>(RefRelayBodyEvent);
+        SubscribeLocalEvent<OFMBodyComponent, ApplyOrganMarkingsEvent>(RefRelayBodyEvent);
         SubscribeLocalEvent<OFMBodyComponent, OrganCopyAppearanceEvent>(RefRelayBodyEvent);
         SubscribeLocalEvent<OFMBodyComponent, HumanoidLayerVisibilityChangedEvent>(RefRelayBodyEvent);
     }

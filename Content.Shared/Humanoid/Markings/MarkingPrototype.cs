@@ -21,9 +21,6 @@ namespace Content.Shared.Humanoid.Markings
         [DataField("sexRestriction")]
         public Sex? SexRestriction { get; private set; }
 
-        [DataField("followSkinColor")]
-        public bool FollowSkinColor { get; private set; } = false;
-
         [DataField("forcedColoring")]
         public bool ForcedColoring { get; private set; } = false;
 

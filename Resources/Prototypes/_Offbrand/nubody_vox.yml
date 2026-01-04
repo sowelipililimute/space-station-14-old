@@ -101,6 +101,9 @@
   - type: OFMVisualOrgan
     data:
       sprite: Mobs/Species/Vox/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Human
 
 - type: entity
   parent: [ OFMOrganBaseTorso, OFMOrganVoxVisual ]

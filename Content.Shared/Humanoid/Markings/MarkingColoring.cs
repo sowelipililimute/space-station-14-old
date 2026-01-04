@@ -30,13 +30,14 @@ public static class MarkingColoring
     (
         MarkingPrototype prototype,
         Color? skinColor,
-        Color? eyeColor
+        Color? eyeColor,
+        List<Marking> otherMarkings
     )
     {
         var colors = new List<Color>();
 
         // Coloring from default properties
-        var defaultColor = prototype.Coloring.Default.GetColor(skinColor, eyeColor);
+        var defaultColor = prototype.Coloring.Default.GetColor(skinColor, eyeColor, otherMarkings);
 
         if (prototype.Coloring.Layers == null)
         {
@@ -68,7 +69,7 @@ public static class MarkingColoring
                 // All specified layers must be colored separately, all unspecified must depend on default coloring
                 if (prototype.Coloring.Layers.TryGetValue(name, out var layerColoring))
                 {
-                    var marking_color = layerColoring.GetColor(skinColor, eyeColor);
+                    var marking_color = layerColoring.GetColor(skinColor, eyeColor, otherMarkings);
                     colors.Add(marking_color);
                 }
                 else
@@ -102,16 +103,16 @@ public sealed partial class LayerColoringDefinition
     [DataField("fallbackColor")]
     public Color FallbackColor = Color.White;
 
-    public Color GetColor(Color? skin, Color? eyes)
+    public Color GetColor(Color? skin, Color? eyes, List<Marking> otherMarkings)
     {
         Color? color = null;
         if (Type != null)
-            color = Type.GetColor(skin, eyes);
+            color = Type.GetColor(skin, eyes, otherMarkings);
         if (color == null)
         {
             foreach (var type in FallbackTypes)
             {
-                color = type.GetColor(skin, eyes);
+                color = type.GetColor(skin, eyes, otherMarkings);
                 if (color != null) break;
             }
         }
@@ -130,10 +131,10 @@ public abstract partial class LayerColoringType
     /// </summary>
     [DataField("negative")]
     public bool Negative { get; private set; } = false;
-    public abstract Color? GetCleanColor(Color? skin, Color? eyes);
-    public Color? GetColor(Color? skin, Color? eyes)
+    public abstract Color? GetCleanColor(Color? skin, Color? eyes, List<Marking> otherMarkings);
+    public Color? GetColor(Color? skin, Color? eyes, List<Marking> otherMarkings)
     {
-        var color = GetCleanColor(skin, eyes);
+        var color = GetCleanColor(skin, eyes, otherMarkings);
         // Negative color
         if (color != null && Negative)
         {

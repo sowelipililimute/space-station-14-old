@@ -22,56 +22,44 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 
         SubscribeLocalEvent<OFMVisualOrganComponent, BodyRelayedEvent<OrganCopyAppearanceEvent>>(OnVisualOrganCopyAppearance);
         SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, BodyRelayedEvent<OrganCopyAppearanceEvent>>(OnMarkingsOrganCopyAppearance);
+        SubscribeLocalEvent<OFMVisualOrganComponent, BodyRelayedEvent<ApplyOrganProfileDataEvent>>(OnVisualOrganApplyProfile);
+        SubscribeLocalEvent<OFMVisualOrganMarkingsComponent, BodyRelayedEvent<ApplyOrganMarkingsEvent>>(OnMarkingsOrganApplyMarkings);
+
+        InitializeModifiers();
     }
 
-    private List<Marking> ResolveMarkings(ProtoId<SpeciesPrototype> species, HumanoidCharacterProfile profile, HumanoidCharacterAppearance appearance)
+    private List<Marking> ResolveMarkings(List<Marking> markings, Color? skinColor, Color? eyeColor)
     {
-        return new();
-        // var markingsSet = new MarkingSet();
-        //
-        // var speciesProto = _prototype.Index(species);
-        // var pointsProto = _prototype.Index(speciesProto.MarkingPoints);
-        // markingsSet.Points = MarkingPoints.CloneMarkingPointDictionary(pointsProto.Points);
-        //
-        // // General markings
-        // var forcedColorMarkings = new List<(Marking, MarkingPrototype)>();
-        // foreach (var marking in appearance.Markings)
-        // {
-        //     if (!_marking.TryGetMarking(marking, out var proto))
-        //         continue;
-        //
-        //     // Anything with forced colouring needs to be added after everything else is situated
-        //     if (!proto.ForcedColoring)
-        //     {
-        //         markingsSet.AddBack(proto.MarkingCategory, marking);
-        //     }
-        //     else
-        //     {
-        //         forcedColorMarkings.Add((marking, proto));
-        //     }
-        // }
-        //
-        // // Ensure the species of this adds up
-        // markingsSet.EnsureSpecies(species, appearance.SkinColor, _marking, _prototype);
-        //
-        // // Now we go through forced colour markings
-        // foreach (var (marking, prototype) in forcedColorMarkings)
-        // {
-        //     var colors = MarkingColoring.GetMarkingLayerColors(
-        //         prototype,
-        //         appearance.SkinColor,
-        //         appearance.EyeColor,
-        //         markingsSet
-        //     );
-        //
-        //     var markingWithColor = new Marking(marking.MarkingId, colors);
-        //     markingsSet.AddBack(prototype.MarkingCategory, markingWithColor);
-        // }
-        //
-        // // Now we ensure defaults
-        // markingsSet.EnsureDefault(appearance.SkinColor, appearance.EyeColor, _marking);
-        //
-        // return markingsSet.GetForwardEnumerator().ToList();
+        var ret = new List<Marking>();
+        var forcedColors = new List<(Marking, MarkingPrototype)>();
+
+        foreach (var marking in markings)
+        {
+            if (!_marking.TryGetMarking(marking, out var proto))
+                continue;
+
+            if (!proto.ForcedColoring)
+                ret.Add(marking);
+            else
+                forcedColors.Add((marking, proto));
+        }
+
+        foreach (var (marking, prototype) in forcedColors)
+        {
+            var colors = MarkingColoring.GetMarkingLayerColors(
+                prototype,
+                skinColor,
+                eyeColor,
+                ret);
+
+            var markingWithColor = new Marking(marking.MarkingId, colors)
+            {
+                Forced = marking.Forced,
+            };
+            ret.Add(markingWithColor);
+        }
+
+        return ret;
     }
 
     protected virtual void SetOrganColor(Entity<OFMVisualOrganComponent> ent, Color color)
@@ -92,48 +80,21 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
         Dirty(ent);
     }
 
-    public void ApplyProfileTo(Entity<OFMBodyComponent?> ent, HumanoidCharacterProfile profile)
+    public void ApplyProfileTo(Entity<OFMVisualBodyComponent?> ent, HumanoidCharacterProfile profile)
     {
         if (!Resolve(ent, ref ent.Comp))
             return;
 
-        var organContainer = _container.EnsureContainer<Container>(ent, OFMBodyComponent.ContainerID);
-
-        foreach (var organ in organContainer.ContainedEntities)
+        var profileEvt = new ApplyOrganProfileDataEvent(new()
         {
-            if (!TryComp<OFMOrganComponent>(organ, out var organComp) || organComp.Category is not { } category)
-                continue;
+            Sex = profile.Sex,
+            SkinColor = profile.Appearance.SkinColor,
+            EyeColor = profile.Appearance.EyeColor,
+        });
+        RaiseLocalEvent(ent, ref profileEvt);
 
-            if (TryComp<OFMVisualOrganComponent>(organ, out var visualOrgan))
-            {
-                if (visualOrgan.Layer.Equals(HumanoidVisualLayers.Eyes))
-                    SetOrganColor((organ, visualOrgan), profile.Appearance.EyeColor);
-                else
-                    SetOrganColor((organ, visualOrgan), profile.Appearance.SkinColor);
-            }
-
-            if (TryComp<OFMVisualOrganMarkingsComponent>(organ, out var visualOrganMarkings) &&
-                profile.Appearance.Markings.TryGetValue(category, out var markings))
-            {
-                var organMarkings = new List<Marking>();
-
-                foreach (var marking in markings)
-                {
-                    if (!_marking.TryGetMarking(marking, out var proto))
-                        continue;
-
-                    if (!visualOrganMarkings.Layers.Contains(proto.BodyPart))
-                        continue;
-
-                    if (_marking.CanBeApplied(visualOrganMarkings.Group, profile.Sex, proto))
-                    {
-                        organMarkings.Add(marking);
-                    }
-                }
-
-                SetOrganMarkings((organ, visualOrganMarkings), organMarkings);
-            }
-        }
+        var markingsEvt = new ApplyOrganMarkingsEvent(profile.Appearance.Markings);
+        RaiseLocalEvent(ent, ref markingsEvt);
     }
 
     public void CopyAppearanceFrom(Entity<OFMBodyComponent?> source, Entity<OFMBodyComponent?> target)
@@ -148,24 +109,6 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
             var evt = new OrganCopyAppearanceEvent(sourceOrgan);
             RaiseLocalEvent(target, ref evt);
         }
-    }
-
-    [Dependency] private readonly Content.Shared.Humanoid.HumanoidProfileSystem _humanoidProfile = default!;
-    [Dependency] private readonly MetaDataSystem _metaData = default!;
-
-    public void SpawnRandomNurist(ProtoId<SpeciesPrototype> species, EntityCoordinates coordinates)
-    {
-        var speciesProto = _prototype.Index(species);
-
-        var profile = HumanoidCharacterProfile.RandomWithSpecies(species);
-
-        var humanoid = EntityManager.CreateEntityUninitialized(speciesProto.OFMMobPrototype, coordinates);
-        EntityManager.InitializeAndStartEntity(humanoid);
-
-        ApplyProfileTo((humanoid, Comp<OFMBodyComponent>(humanoid)), profile);
-
-        _humanoidProfile.ApplyProfileTo(humanoid, profile);
-        _metaData.SetEntityName(humanoid, profile.Name);
     }
 
     private void OnVisualOrganCopyAppearance(Entity<OFMVisualOrganComponent> ent, ref BodyRelayedEvent<OrganCopyAppearanceEvent> args)
@@ -184,10 +127,50 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
         if (!TryComp<OFMVisualOrganMarkingsComponent>(args.Args.Organ, out var other))
             return;
 
-        if (!other.Layers.SetEquals(ent.Comp.Layers))
+        if (!other.MarkingData.Layers.SetEquals(ent.Comp.MarkingData.Layers))
             return;
 
         SetOrganMarkings(ent, other.Markings);
+    }
+
+    private void OnVisualOrganApplyProfile(Entity<OFMVisualOrganComponent> ent, ref BodyRelayedEvent<ApplyOrganProfileDataEvent> args)
+    {
+        ent.Comp.Profile = args.Args.Data;
+
+        if (ent.Comp.Layer.Equals(HumanoidVisualLayers.Eyes))
+            SetOrganColor(ent, ent.Comp.Profile.EyeColor);
+        else
+            SetOrganColor(ent, ent.Comp.Profile.SkinColor);
+    }
+
+    private void OnMarkingsOrganApplyMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, ref BodyRelayedEvent<ApplyOrganMarkingsEvent> args)
+    {
+        if (Comp<OFMOrganComponent>(ent).Category is not { } category)
+            return;
+
+        if (!args.Args.Markings.TryGetValue(category, out var markingSet))
+            return;
+
+        var organMarkings = new List<Marking>();
+
+        foreach (var layer in ent.Comp.MarkingData.Layers)
+        {
+            if (!markingSet.TryGetValue(layer, out var markings))
+                continue;
+
+            foreach (var marking in markings)
+            {
+                if (!_marking.TryGetMarking(marking, out var proto))
+                    continue;
+
+                organMarkings.Add(marking);
+            }
+        }
+
+        var profile = Comp<OFMVisualOrganComponent>(ent).Profile;
+        var resolved = ResolveMarkings(organMarkings, profile.SkinColor, profile.EyeColor);
+
+        SetOrganMarkings(ent, resolved);
     }
 }
 
@@ -196,3 +179,16 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 /// </summary>
 [ByRefEvent]
 public readonly record struct OrganCopyAppearanceEvent(EntityUid Organ);
+
+/// <summary>
+/// Raised on body entity when a profile is being applied to it
+/// </summary>
+[ByRefEvent]
+public readonly record struct ApplyOrganProfileDataEvent(OrganProfileData Data);
+
+/// <summary>
+/// Raised on body entity when a profile is being applied to it
+/// </summary>
+[ByRefEvent]
+public readonly record struct ApplyOrganMarkingsEvent(Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> Markings);
+

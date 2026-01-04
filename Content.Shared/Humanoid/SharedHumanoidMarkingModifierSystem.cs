@@ -1,4 +1,7 @@
+using Content.Shared._Offbrand.NuBody;
 using Content.Shared.Humanoid.Markings;
+using Content.Shared.Humanoid.Prototypes;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared.Humanoid;
@@ -12,13 +15,11 @@ public enum HumanoidMarkingModifierKey
 [Serializable, NetSerializable]
 public sealed class HumanoidMarkingModifierMarkingSetMessage : BoundUserInterfaceMessage
 {
-    public MarkingSet MarkingSet { get; }
-    public bool ResendState { get; }
+    public Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> Markings { get; }
 
-    public HumanoidMarkingModifierMarkingSetMessage(MarkingSet set, bool resendState)
+    public HumanoidMarkingModifierMarkingSetMessage(Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> markings)
     {
-        MarkingSet = set;
-        ResendState = resendState;
+        Markings = markings;
     }
 }
 
@@ -27,23 +28,17 @@ public sealed class HumanoidMarkingModifierState : BoundUserInterfaceState
 {
     // TODO just use the component state, remove the BUI state altogether.
     public HumanoidMarkingModifierState(
-        MarkingSet markingSet,
-        string species,
-        Sex sex,
-        Color skinColor
+        Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> markings,
+        Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData> organData,
+        Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData> organProfileData
     )
     {
-        MarkingSet = markingSet;
-        Species = species;
-        Sex = sex;
-        SkinColor = skinColor;
+        Markings = markings;
+        OrganData = organData;
+        OrganProfileData = organProfileData;
     }
 
-    public MarkingSet MarkingSet { get; }
-    public string Species { get; }
-    public Sex Sex { get; }
-    public Color SkinColor { get; }
-    public Color EyeColor { get; }
-    public Color? HairColor { get; }
-    public Color? FacialHairColor { get; }
+    public Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> Markings { get; }
+    public Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData> OrganData { get; }
+    public Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData> OrganProfileData { get; }
 }

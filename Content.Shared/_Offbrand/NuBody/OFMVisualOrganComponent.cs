@@ -1,4 +1,6 @@
+using Content.Shared.Humanoid;
 using Robust.Shared.GameStates;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared._Offbrand.NuBody;
 
@@ -17,4 +19,34 @@ public sealed partial class OFMVisualOrganComponent : Component
     /// </summary>
     [DataField(required: true), AutoNetworkedField, AlwaysPushInheritance]
     public PrototypeLayerData Data;
+
+    [DataField, AutoNetworkedField]
+    public OrganProfileData Profile;
 }
+
+/// <summary>
+/// Defines the coloration, sex, etc. of organs
+/// </summary>
+[DataDefinition]
+[Serializable, NetSerializable]
+public partial record struct OrganProfileData
+{
+    /// <summary>
+    /// The "sex" of this organ
+    /// </summary>
+    [DataField]
+    public Sex Sex;
+
+    /// <summary>
+    /// The "eye color" of this organ
+    /// </summary>
+    [DataField]
+    public Color EyeColor;
+
+    /// <summary>
+    /// The "skin color" of this organ
+    /// </summary>
+    [DataField]
+    public Color SkinColor;
+}
+

@@ -3,7 +3,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human, Dwarf]
   sprites:
   - sprite: Mobs/Customization/ears.rsi
@@ -14,7 +13,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human]
   sprites:
   - sprite: Mobs/Customization/ears.rsi
@@ -25,7 +23,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human, Dwarf]
   sprites:
   - sprite: Mobs/Customization/ears.rsi
@@ -36,7 +33,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human]
   sprites:
   - sprite: Mobs/Customization/ears.rsi
@@ -47,7 +43,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human]
   sprites:
   - sprite: Mobs/Customization/ears.rsi
@@ -58,7 +53,6 @@
   bodyPart: HeadTop
   markingCategory: HeadTop
   forcedColoring: true
-  followSkinColor: true
   groupWhitelist: [Human, Dwarf]
   sprites:
   - sprite: Mobs/Customization/ears.rsi

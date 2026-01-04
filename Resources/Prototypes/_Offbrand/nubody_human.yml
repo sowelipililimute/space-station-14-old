@@ -1,3 +1,43 @@
+- type: markingsGroup
+  id: Human
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.Snout:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LFoot:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RFoot:
+      limit: 1
+      required: false
+
 - type: entity
   parent: OFMNuristAppearance
   id: OFMAppearanceHuman
@@ -54,6 +94,9 @@
   - type: OFMVisualOrgan
     data:
       sprite: Mobs/Species/Human/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Human
 
 - type: entity
   parent: [ OFMOrganBaseTorso, OFMOrganHumanVisual ]
@@ -100,7 +143,7 @@
   id: OFMOrganHumanBrain
 
 - type: entity
-  parent: [ OFMOrganBaseEyes, OFMOrganHuman ]
+  parent: [ OFMOrganHumanVisual, OFMOrganBaseEyes ]
   id: OFMOrganHumanEyes
 
 - type: entity

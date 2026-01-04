@@ -21,12 +21,12 @@ public sealed partial class HumanoidCharacterAppearance : ICharacterAppearance, 
     public Color SkinColor { get; set; } = Color.FromHsv(new Vector4(0.07f, 0.2f, 1f, 1f));
 
     [DataField]
-    public Dictionary<ProtoId<OrganCategoryPrototype>, List<Marking>> Markings { get; set; } = new();
+    public Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> Markings { get; set; } = new();
 
     public HumanoidCharacterAppearance(
         Color eyeColor,
         Color skinColor,
-        Dictionary<ProtoId<OrganCategoryPrototype>, List<Marking>> markings)
+        Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> markings)
     {
         EyeColor = ClampColor(eyeColor);
         SkinColor = ClampColor(skinColor);
@@ -49,7 +49,7 @@ public sealed partial class HumanoidCharacterAppearance : ICharacterAppearance, 
         return new(EyeColor, newColor, Markings);
     }
 
-    public HumanoidCharacterAppearance WithMarkings(Dictionary<ProtoId<OrganCategoryPrototype>, List<Marking>> newMarkings)
+    public HumanoidCharacterAppearance WithMarkings(Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> newMarkings)
     {
         return new(EyeColor, SkinColor, newMarkings);
     }
@@ -138,7 +138,7 @@ public sealed partial class HumanoidCharacterAppearance : ICharacterAppearance, 
 
             foreach (var (organ, organProtoID) in speciesProto.Organs)
             {
-                if (!markingManager.TryGetMarkingData(organProtoID, out var layers, out var group))
+                if (!markingManager.TryGetMarkingData(organProtoID, out var organData))
                 {
                     validatedMarkings.Remove(organ);
                     continue;
@@ -147,9 +147,9 @@ public sealed partial class HumanoidCharacterAppearance : ICharacterAppearance, 
                 var actualMarkings = appearance.Markings.GetValueOrDefault(organ)?.ShallowClone() ?? [];
 
                 markingManager.EnsureValidColors(actualMarkings);
-                markingManager.EnsureValidGroupAndSex(actualMarkings, group.Value, sex);
-                markingManager.EnsureValidLayers(actualMarkings, layers);
-                markingManager.EnsureValidLimits(actualMarkings, group.Value, layers, skinColor, eyeColor);
+                markingManager.EnsureValidGroupAndSex(actualMarkings, organData.Value.Group, sex);
+                markingManager.EnsureValidLayers(actualMarkings, organData.Value.Layers);
+                markingManager.EnsureValidLimits(actualMarkings, organData.Value.Group, organData.Value.Layers, skinColor, eyeColor);
 
                 validatedMarkings[organ] = actualMarkings;
             }

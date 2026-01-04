@@ -14,37 +14,8 @@ namespace Content.Client.Humanoid;
 [GenerateTypedNameReferences]
 public sealed partial class HumanoidMarkingModifierWindow : DefaultWindow
 {
-    public Action<MarkingSet>? OnMarkingAdded;
-    public Action<MarkingSet>? OnMarkingRemoved;
-    public Action<MarkingSet>? OnMarkingColorChange;
-    public Action<MarkingSet>? OnMarkingRankChange;
-    private readonly IPrototypeManager _protoMan = default!;
-
     public HumanoidMarkingModifierWindow()
     {
         RobustXamlLoader.Load(this);
-        _protoMan = IoCManager.Resolve<IPrototypeManager>();
-
-        MarkingPickerWidget.OnMarkingAdded += set => OnMarkingAdded!(set);
-        MarkingPickerWidget.OnMarkingRemoved += set => OnMarkingRemoved!(set);
-        MarkingPickerWidget.OnMarkingColorChange += set => OnMarkingColorChange!(set);
-        MarkingPickerWidget.OnMarkingRankChange += set => OnMarkingRankChange!(set);
-        MarkingForced.OnToggled += args => MarkingPickerWidget.Forced = args.Pressed;
-        MarkingIgnoreSpecies.OnToggled += args => MarkingPickerWidget.Forced = args.Pressed;
-
-        MarkingPickerWidget.Forced = MarkingForced.Pressed;
-        MarkingPickerWidget.IgnoreSpecies = MarkingForced.Pressed;
-    }
-
-    public void SetState(
-        MarkingSet markings,
-        string species,
-        Sex sex,
-        Color skinColor
-    )
-    {
-        var eyesColor = Color.White;
-
-        MarkingPickerWidget.SetData(markings, species, sex, skinColor, eyesColor);
     }
 }

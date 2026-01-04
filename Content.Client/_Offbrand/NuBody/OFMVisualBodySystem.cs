@@ -173,8 +173,6 @@ public sealed class OFMVisualBodySystem : SharedOFMVisualBodySystem
 
     private void OnMarkingsChangedVisibility(Entity<OFMVisualOrganMarkingsComponent> ent, ref BodyRelayedEvent<HumanoidLayerVisibilityChangedEvent> args)
     {
-        Log.Debug($"organ {ToPrettyString(ent):ent} updating {args.Args.Layer} {args.Args.Visible}");
-
         foreach (var marking in ent.Comp.Markings)
         {
             if (!_marking.TryGetMarking(marking, out var proto))

@@ -83,6 +83,7 @@
   abstract: true
   components:
   - type: OFMBody
+  - type: OFMVisualBody
   - type: HumanoidProfile
   - type: Hands
   - type: ComplexInteraction
@@ -260,9 +261,10 @@
     data:
       state: torso_m
   - type: OFMVisualOrganMarkings
-    layers:
-    - Chest
-    - Tail
+    markingData:
+      layers:
+      - Chest
+      - Tail
 
 - type: entity
   parent: OFMOrganBase
@@ -277,14 +279,15 @@
     data:
       state: head_m
   - type: OFMVisualOrganMarkings
-    layers:
-    - Head
-    - Hair
-    - FacialHair
-    - Snout
-    - SnoutCover
-    - HeadSide
-    - HeadTop
+    markingData:
+      layers:
+      - Head
+      - Hair
+      - FacialHair
+      - Snout
+      - SnoutCover
+      - HeadSide
+      - HeadTop
 
 - type: entity
   parent: OFMOrganBase
@@ -299,8 +302,9 @@
     data:
       state: l_arm
   - type: OFMVisualOrganMarkings
-    layers:
-    - LArm
+    markingData:
+      layers:
+      - LArm
 
 - type: entity
   parent: OFMOrganBase
@@ -315,8 +319,9 @@
     data:
       state: r_arm
   - type: OFMVisualOrganMarkings
-    layers:
-    - RArm
+    markingData:
+      layers:
+      - RArm
 
 - type: entity
   parent: OFMOrganBase
@@ -335,8 +340,9 @@
     data:
       location: Left
   - type: OFMVisualOrganMarkings
-    layers:
-    - LHand
+    markingData:
+      layers:
+      - LHand
 
 - type: entity
   parent: OFMOrganBase
@@ -355,8 +361,9 @@
     data:
       location: Right
   - type: OFMVisualOrganMarkings
-    layers:
-    - RHand
+    markingData:
+      layers:
+      - RHand
 
 - type: entity
   parent: OFMOrganBase
@@ -371,8 +378,9 @@
     data:
       state: l_leg
   - type: OFMVisualOrganMarkings
-    layers:
-    - LLeg
+    markingData:
+      layers:
+      - LLeg
 
 - type: entity
   parent: OFMOrganBase
@@ -387,8 +395,9 @@
     data:
       state: r_leg
   - type: OFMVisualOrganMarkings
-    layers:
-    - RLeg
+    markingData:
+      layers:
+      - RLeg
 
 - type: entity
   parent: OFMOrganBase
@@ -403,13 +412,15 @@
     data:
       state: l_foot
   - type: OFMVisualOrganMarkings
-    layers:
-    - LFoot
+    markingData:
+      layers:
+      - LFoot
 
 - type: entity
   parent: OFMOrganBase
   id: OFMOrganBaseFootRight
   name: right foot
+  abstract: true
   components:
   - type: OFMOrgan
     category: FootRight
@@ -418,9 +429,9 @@
     data:
       state: r_foot
   - type: OFMVisualOrganMarkings
-    layers:
-    - RFoot
-
+    markingData:
+      layers:
+      - RFoot
 
 - type: entity
   parent: OFMOrganBase
@@ -445,8 +456,9 @@
       sprite: Mobs/Customization/eyes.rsi
       state: eyes
   - type: OFMVisualOrganMarkings
-    layers:
-    - Eyes
+    markingData:
+      layers:
+      - Eyes
 
 - type: entity
   parent: OFMOrganBase
