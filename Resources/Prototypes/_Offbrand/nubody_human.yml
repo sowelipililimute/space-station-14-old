@@ -145,6 +145,10 @@
 - type: entity
   parent: [ OFMOrganHumanVisual, OFMOrganBaseEyes ]
   id: OFMOrganHumanEyes
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Customization/eyes.rsi
 
 - type: entity
   parent: [ OFMOrganBaseTongue, OFMOrganHuman ]

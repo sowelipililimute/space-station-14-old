@@ -59,5 +59,7 @@ public sealed partial class MarkingPicker : Control
             OrganTabs.SetTabTitle(i, organ.Id);
             i++;
         }
+
+        OrganTabs.TabsVisible = i > 1;
     }
 }

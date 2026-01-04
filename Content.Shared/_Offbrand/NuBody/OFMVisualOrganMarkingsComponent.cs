@@ -25,6 +25,7 @@ public sealed partial class OFMVisualOrganMarkingsComponent : Component
     /// <summary>
     /// Client only - the last markings applied by this component
     /// </summary>
+    [ViewVariables]
     public List<Marking> AppliedMarkings = new();
 }
 

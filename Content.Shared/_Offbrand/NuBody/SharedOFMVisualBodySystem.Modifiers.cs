@@ -43,11 +43,19 @@ public abstract partial class SharedOFMVisualBodySystem
     	});
     }
 
-    private void OnModifiersOpened(Entity<OFMVisualBodyComponent> ent, ref BoundUIOpenedEvent args)
+    /// <summary>
+    /// Gathers all the markings-relevant data from this entity
+    /// </summary>
+    /// <param name="filter">If set, only returns data concerning the given layers</param>
+    public void GatherMarkingsData(Entity<OFMVisualBodyComponent> ent,
+        HashSet<HumanoidVisualLayers>? filter,
+        out Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData> profiles,
+        out Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData> markings,
+        out Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> applied)
     {
-        var profiles = new Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData>();
-        var markings = new Dictionary<ProtoId<OrganCategoryPrototype>, OrganMarkingData>();
-        var applied = new Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>>();
+        profiles = new();
+        markings = new();
+        applied = new();
 
         var organContainer = _container.EnsureContainer<Container>(ent, OFMBodyComponent.ContainerID);
 
@@ -78,6 +86,11 @@ public abstract partial class SharedOFMVisualBodySystem
                 applied[category] = dict;
             }
         }
+    }
+
+    private void OnModifiersOpened(Entity<OFMVisualBodyComponent> ent, ref BoundUIOpenedEvent args)
+    {
+        GatherMarkingsData(ent, null, out var profiles, out var markings, out var applied);
 
         _userInterface.SetUiState(ent.Owner, HumanoidMarkingModifierKey.Key, new HumanoidMarkingModifierState(applied, markings, profiles));
     }
@@ -85,6 +98,12 @@ public abstract partial class SharedOFMVisualBodySystem
     private void OnSetModifiers(Entity<OFMVisualBodyComponent> ent, ref HumanoidMarkingModifierMarkingSetMessage args)
     {
         var markingsEvt = new ApplyOrganMarkingsEvent(args.Markings);
+        RaiseLocalEvent(ent, ref markingsEvt);
+    }
+
+    public void ApplyMarkings(EntityUid ent, Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> markings)
+    {
+        var markingsEvt = new ApplyOrganMarkingsEvent(markings);
         RaiseLocalEvent(ent, ref markingsEvt);
     }
 }
