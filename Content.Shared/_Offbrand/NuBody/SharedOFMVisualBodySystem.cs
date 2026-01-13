@@ -1,11 +1,7 @@
 using System.Linq;
 using Content.Shared.Humanoid.Markings;
-using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Humanoid;
-using Content.Shared.Preferences;
 using Robust.Shared.Containers;
-using Robust.Shared.Containers;
-using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -81,23 +77,6 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
         Dirty(ent);
     }
 
-    public void ApplyProfileTo(Entity<OFMVisualBodyComponent?> ent, HumanoidCharacterProfile profile)
-    {
-        if (!Resolve(ent, ref ent.Comp))
-            return;
-
-        var profileEvt = new ApplyOrganProfileDataEvent(new()
-        {
-            Sex = profile.Sex,
-            SkinColor = profile.Appearance.SkinColor,
-            EyeColor = profile.Appearance.EyeColor,
-        });
-        RaiseLocalEvent(ent, ref profileEvt);
-
-        var markingsEvt = new ApplyOrganMarkingsEvent(profile.Appearance.Markings);
-        RaiseLocalEvent(ent, ref markingsEvt);
-    }
-
     public void CopyAppearanceFrom(Entity<OFMBodyComponent?> source, Entity<OFMBodyComponent?> target)
     {
         if (!Resolve(source, ref source.Comp) || !Resolve(target, ref target.Comp))
@@ -136,7 +115,17 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 
     private void OnVisualOrganApplyProfile(Entity<OFMVisualOrganComponent> ent, ref BodyRelayedEvent<ApplyOrganProfileDataEvent> args)
     {
-        ent.Comp.Profile = args.Args.Data;
+        if (Comp<OFMOrganComponent>(ent).Category is not { } category)
+            return;
+
+        var relevantData = args.Args.Base;
+        if (args.Args.Profiles?.TryGetValue(category, out var profile) == true)
+            relevantData = profile;
+
+        if (relevantData is not { } data)
+            return;
+
+        ent.Comp.Profile = data;
 
         if (ent.Comp.Layer.Equals(HumanoidVisualLayers.Eyes))
             SetOrganColor(ent, ent.Comp.Profile.EyeColor);
@@ -188,10 +177,10 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
 public readonly record struct OrganCopyAppearanceEvent(EntityUid Organ);
 
 /// <summary>
-/// Raised on body entity when a profile is being applied to it
+/// Raised on body entity when profiles are being applied to it
 /// </summary>
 [ByRefEvent]
-public readonly record struct ApplyOrganProfileDataEvent(OrganProfileData Data);
+public readonly record struct ApplyOrganProfileDataEvent(OrganProfileData? Base, Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData>? Profiles);
 
 /// <summary>
 /// Raised on body entity when a profile is being applied to it

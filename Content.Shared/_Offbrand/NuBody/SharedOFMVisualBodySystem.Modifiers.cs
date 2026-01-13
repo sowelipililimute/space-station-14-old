@@ -2,6 +2,7 @@ using Content.Shared.Administration.Managers;
 using Content.Shared.Administration;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
+using Content.Shared.Preferences;
 using Content.Shared.Verbs;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
@@ -94,5 +95,35 @@ public abstract partial class SharedOFMVisualBodySystem
     {
         var markingsEvt = new ApplyOrganMarkingsEvent(markings);
         RaiseLocalEvent(ent, ref markingsEvt);
+    }
+
+    public void ApplyProfileTo(Entity<OFMVisualBodyComponent?> ent, HumanoidCharacterProfile profile)
+    {
+        if (!Resolve(ent, ref ent.Comp))
+            return;
+
+        var profileEvt = new ApplyOrganProfileDataEvent(new()
+            {
+                Sex = profile.Sex,
+                SkinColor = profile.Appearance.SkinColor,
+                EyeColor = profile.Appearance.EyeColor,
+            },
+            null);
+        RaiseLocalEvent(ent, ref profileEvt);
+
+        var markingsEvt = new ApplyOrganMarkingsEvent(profile.Appearance.Markings);
+        RaiseLocalEvent(ent, ref markingsEvt);
+    }
+
+    public void ApplyProfile(EntityUid ent, OrganProfileData profile)
+    {
+        var profileEvt = new ApplyOrganProfileDataEvent(profile, null);
+        RaiseLocalEvent(ent, ref profileEvt);
+    }
+
+    public void ApplyProfiles(EntityUid ent, Dictionary<ProtoId<OrganCategoryPrototype>, OrganProfileData> profiles)
+    {
+        var profileEvt = new ApplyOrganProfileDataEvent(null, profiles);
+        RaiseLocalEvent(ent, ref profileEvt);
     }
 }

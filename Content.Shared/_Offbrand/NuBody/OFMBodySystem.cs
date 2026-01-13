@@ -1,3 +1,4 @@
+using Content.Shared.DragDrop;
 using Robust.Shared.Containers;
 
 namespace Content.Shared._Offbrand.NuBody;
@@ -15,6 +16,8 @@ public sealed partial class OFMBodySystem : EntitySystem
 
         SubscribeLocalEvent<OFMBodyComponent, ComponentInit>(OnBodyInit);
         SubscribeLocalEvent<OFMBodyComponent, ComponentShutdown>(OnBodyShutdown);
+
+        SubscribeLocalEvent<OFMBodyComponent, CanDragEvent>(OnCanDrag);
 
         SubscribeLocalEvent<OFMBodyComponent, EntInsertedIntoContainerMessage>(OnBodyEntInserted);
         SubscribeLocalEvent<OFMBodyComponent, EntRemovedFromContainerMessage>(OnBodyEntRemoved);
@@ -77,5 +80,10 @@ public sealed partial class OFMBodySystem : EntitySystem
 
         organ.Body = null;
         Dirty(args.Entity, organ);
+    }
+
+    private void OnCanDrag(Entity<OFMBodyComponent> ent, ref CanDragEvent args)
+    {
+        args.Handled = true;
     }
 }
