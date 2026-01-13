@@ -1,0 +1,179 @@
+- type: markingsGroup
+  id: Diona
+  onlyGroupWhitelisted: true
+  limits:
+    enum.HumanoidVisualLayers.Head:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.HeadTop:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.HeadSide:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.LArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Overlay:
+      limit: 1
+      required: true
+      default: [ DionaVineOverlay ]
+
+- type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceDiona
+  components:
+  - type: Inventory
+    templateId: diona
+    femaleDisplacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Human/displacement.rsi
+            state: jumpsuit-female
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganDionaTorso
+        - id: OFMOrganDionaHead
+        - id: OFMOrganDionaArmLeft
+        - id: OFMOrganDionaArmRight
+        - id: OFMOrganDionaHandRight
+        - id: OFMOrganDionaHandLeft
+        - id: OFMOrganDionaLegLeft
+        - id: OFMOrganDionaLegRight
+        - id: OFMOrganDionaFootLeft
+        - id: OFMOrganDionaFootRight
+        - id: OFMOrganDionaBrain
+        - id: OFMOrganDionaEyes
+        - id: OFMOrganDionaTongue
+        - id: OFMOrganDionaAppendix
+        - id: OFMOrganDionaEars
+        - id: OFMOrganDionaLungs
+        - id: OFMOrganDionaHeart
+        - id: OFMOrganDionaStomach
+        - id: OFMOrganDionaLiver
+        - id: OFMOrganDionaKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceDiona
+  - OFMNuristMob
+  id: OFMMobDiona
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganDiona
+  abstract: true
+  suffix: diona
+
+- type: entity
+  parent: OFMOrganDiona
+  id: OFMOrganDionaVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Diona/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Diona
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganDionaVisual ]
+  id: OFMOrganDionaTorso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganDionaVisual ]
+  id: OFMOrganDionaHead
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganDionaVisual ]
+  id: OFMOrganDionaArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganDionaVisual ]
+  id: OFMOrganDionaArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganDionaVisual ]
+  id: OFMOrganDionaHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganDionaVisual ]
+  id: OFMOrganDionaHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganDionaVisual ]
+  id: OFMOrganDionaLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganDionaVisual ]
+  id: OFMOrganDionaLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganDionaVisual ]
+  id: OFMOrganDionaFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganDionaVisual ]
+  id: OFMOrganDionaFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganDiona ]
+  id: OFMOrganDionaBrain
+
+- type: entity
+  parent: [ OFMOrganDionaVisual, OFMOrganBaseEyes ]
+  name: eyes
+  id: OFMOrganDionaEyes
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: diona
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganDiona ]
+  id: OFMOrganDionaTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganDiona ]
+  id: OFMOrganDionaAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganDiona ]
+  id: OFMOrganDionaEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganDiona ]
+  id: OFMOrganDionaLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganDiona ]
+  id: OFMOrganDionaHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganDiona ]
+  id: OFMOrganDionaStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganDiona ]
+  id: OFMOrganDionaLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganDiona ]
+  id: OFMOrganDionaKidneys

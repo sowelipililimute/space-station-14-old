@@ -390,7 +390,7 @@
 
 - type: marking
   id: DionaVineOverlay
-  bodyPart: LLeg
+  bodyPart: Overlay
   markingCategory: Overlay
   groupWhitelist: [Diona]
   coloring:

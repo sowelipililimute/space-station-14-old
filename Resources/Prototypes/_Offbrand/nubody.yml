@@ -38,6 +38,9 @@
     - map: ["enum.HumanoidVisualLayers.LHand"]
     - map: ["enum.HumanoidVisualLayers.RHand"]
 
+    # Stuff that goes over the body but below equipment
+    - map: ["enum.HumanoidVisualLayers.Overlay"]
+
     # More equipment
     - map: [ "gloves" ]
     - map: [ "shoes" ]
@@ -265,6 +268,7 @@
       layers:
       - Chest
       - Tail
+      - Overlay
 
 - type: entity
   parent: OFMOrganBase

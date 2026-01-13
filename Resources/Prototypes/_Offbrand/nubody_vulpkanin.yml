@@ -1,0 +1,234 @@
+- type: markingsGroup
+  id: Vulpkanin
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 1
+      onlyGroupWhitelisted: true
+      required: false
+    enum.HumanoidVisualLayers.Head:
+      limit: 3
+      required: false
+    enum.HumanoidVisualLayers.HeadTop:
+      limit: 1
+      required: true
+      default: [ VulpEar ]
+    enum.HumanoidVisualLayers.Snout:
+      limit: 1
+      required: true
+      default: [ VulpSnout ]
+    enum.HumanoidVisualLayers.SnoutCover:
+      limit: 3
+      required: false
+    enum.HumanoidVisualLayers.Tail:
+      limit: 1
+      required: true
+      default: [ VulpTailVulp ]
+    enum.HumanoidVisualLayers.LArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LFoot:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RFoot:
+      limit: 1
+      required: false
+
+- type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceVulpkanin
+  components:
+  - type: Inventory
+    speciesId: vulpkanin
+    displacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: jumpsuit
+      back:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: back
+      outerClothing:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: outerwear
+      gloves:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: hand
+      shoes:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: shoes
+      head:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: head
+      neck:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: neck
+      eyes:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: eyes
+      belt:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Vulpkanin/displacement.rsi
+            state: belt
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganVulpkaninTorso
+        - id: OFMOrganVulpkaninHead
+        - id: OFMOrganVulpkaninArmLeft
+        - id: OFMOrganVulpkaninArmRight
+        - id: OFMOrganVulpkaninHandRight
+        - id: OFMOrganVulpkaninHandLeft
+        - id: OFMOrganVulpkaninLegLeft
+        - id: OFMOrganVulpkaninLegRight
+        - id: OFMOrganVulpkaninFootLeft
+        - id: OFMOrganVulpkaninFootRight
+        - id: OFMOrganVulpkaninBrain
+        - id: OFMOrganVulpkaninEyes
+        - id: OFMOrganVulpkaninTongue
+        - id: OFMOrganVulpkaninAppendix
+        - id: OFMOrganVulpkaninEars
+        - id: OFMOrganVulpkaninLungs
+        - id: OFMOrganVulpkaninHeart
+        - id: OFMOrganVulpkaninStomach
+        - id: OFMOrganVulpkaninLiver
+        - id: OFMOrganVulpkaninKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceVulpkanin
+  - OFMNuristMob
+  id: OFMMobVulpkanin
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganVulpkanin
+  abstract: true
+  suffix: vulpkanin
+
+- type: entity
+  parent: OFMOrganVulpkanin
+  id: OFMOrganVulpkaninVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Vulpkanin/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Vulpkanin
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninTorso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninHead
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganVulpkaninVisual ]
+  id: OFMOrganVulpkaninFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninBrain
+
+- type: entity
+  parent: [ OFMOrganVulpkaninVisual, OFMOrganBaseEyes ]
+  name: eyes
+  id: OFMOrganVulpkaninEyes
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganVulpkanin ]
+  id: OFMOrganVulpkaninKidneys

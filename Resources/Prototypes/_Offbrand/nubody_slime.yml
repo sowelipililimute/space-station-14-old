@@ -1,0 +1,180 @@
+- type: markingsGroup
+  id: Slime
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.LArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RHand:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LFoot:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RFoot:
+      limit: 1
+      required: false
+
+- type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceSlime
+  components:
+  - type: Inventory
+    femaleDisplacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Human/displacement.rsi
+            state: jumpsuit-female
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganSlimeTorso
+        - id: OFMOrganSlimeHead
+        - id: OFMOrganSlimeArmLeft
+        - id: OFMOrganSlimeArmRight
+        - id: OFMOrganSlimeHandRight
+        - id: OFMOrganSlimeHandLeft
+        - id: OFMOrganSlimeLegLeft
+        - id: OFMOrganSlimeLegRight
+        - id: OFMOrganSlimeFootLeft
+        - id: OFMOrganSlimeFootRight
+        - id: OFMOrganSlimeBrain
+        - id: OFMOrganSlimeEyes
+        - id: OFMOrganSlimeTongue
+        - id: OFMOrganSlimeAppendix
+        - id: OFMOrganSlimeEars
+        - id: OFMOrganSlimeLungs
+        - id: OFMOrganSlimeHeart
+        - id: OFMOrganSlimeStomach
+        - id: OFMOrganSlimeLiver
+        - id: OFMOrganSlimeKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceSlime
+  - OFMNuristMob
+  id: OFMMobSlime
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganSlime
+  abstract: true
+  suffix: slime
+
+- type: entity
+  parent: OFMOrganSlime
+  id: OFMOrganSlimeVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Slime/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Slime
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeTorso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeHead
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganSlimeVisual ]
+  id: OFMOrganSlimeFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganSlime ]
+  id: OFMOrganSlimeBrain
+
+- type: entity
+  parent: [ OFMOrganSlimeVisual, OFMOrganBaseEyes ]
+  id: OFMOrganSlimeEyes
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganSlime ]
+  id: OFMOrganSlimeTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganSlime ]
+  id: OFMOrganSlimeAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganSlime ]
+  id: OFMOrganSlimeEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganSlime ]
+  id: OFMOrganSlimeLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganSlime ]
+  id: OFMOrganSlimeHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganSlime ]
+  id: OFMOrganSlimeStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganSlime ]
+  id: OFMOrganSlimeLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganSlime ]
+  id: OFMOrganSlimeKidneys

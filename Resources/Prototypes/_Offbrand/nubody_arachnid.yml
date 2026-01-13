@@ -1,0 +1,171 @@
+- type: markingsGroup
+  id: Arachnid
+  onlyGroupWhitelisted: true
+  limits:
+    enum.HumanoidVisualLayers.Hair:
+      limit: 0
+      required: false
+    enum.HumanoidVisualLayers.FacialHair:
+      limit: 0
+      required: false
+    enum.HumanoidVisualLayers.Tail:
+      limit: 1
+      required: true
+      default: [ ArachnidAppendagesDefault ]
+    enum.HumanoidVisualLayers.Chest:
+      limit: 2
+      required: false
+    enum.HumanoidVisualLayers.HeadSide:
+      limit: 1
+      required: true
+      default: [ ArachnidCheliceraeDownwards ]
+    enum.HumanoidVisualLayers.LArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RArm:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.LLeg:
+      limit: 1
+      required: false
+    enum.HumanoidVisualLayers.RLeg:
+      limit: 1
+      required: false
+
+- type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceArachnid
+  components:
+  - type: Inventory
+    templateId: arachnid
+    speciesId: arachnid
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganArachnidTorso
+        - id: OFMOrganArachnidHead
+        - id: OFMOrganArachnidArmLeft
+        - id: OFMOrganArachnidArmRight
+        - id: OFMOrganArachnidHandRight
+        - id: OFMOrganArachnidHandLeft
+        - id: OFMOrganArachnidLegLeft
+        - id: OFMOrganArachnidLegRight
+        - id: OFMOrganArachnidFootLeft
+        - id: OFMOrganArachnidFootRight
+        - id: OFMOrganArachnidBrain
+        - id: OFMOrganArachnidEyes
+        - id: OFMOrganArachnidTongue
+        - id: OFMOrganArachnidAppendix
+        - id: OFMOrganArachnidEars
+        - id: OFMOrganArachnidLungs
+        - id: OFMOrganArachnidHeart
+        - id: OFMOrganArachnidStomach
+        - id: OFMOrganArachnidLiver
+        - id: OFMOrganArachnidKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceArachnid
+  - OFMNuristMob
+  id: OFMMobArachnid
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganArachnid
+  abstract: true
+  suffix: arachnid
+
+- type: entity
+  parent: OFMOrganArachnid
+  id: OFMOrganArachnidVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Arachnid/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Arachnid
+
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidTorso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidHead
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganArachnidVisual ]
+  id: OFMOrganArachnidFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganArachnid ]
+  id: OFMOrganArachnidBrain
+
+- type: entity
+  parent: [ OFMOrganArachnidVisual, OFMOrganBaseEyes ]
+  name: eyes
+  id: OFMOrganArachnidEyes
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganArachnid ]
+  id: OFMOrganArachnidTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganArachnid ]
+  id: OFMOrganArachnidAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganArachnid ]
+  id: OFMOrganArachnidEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganArachnid ]
+  id: OFMOrganArachnidLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganArachnid ]
+  id: OFMOrganArachnidHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganArachnid ]
+  id: OFMOrganArachnidStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganArachnid ]
+  id: OFMOrganArachnidLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganArachnid ]
+  id: OFMOrganArachnidKidneys

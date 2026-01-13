@@ -1,0 +1,145 @@
+- type: entity
+  parent: OFMNuristAppearance
+  id: OFMAppearanceGingerbread
+  components:
+  - type: Inventory
+    femaleDisplacements:
+      jumpsuit:
+        sizeMaps:
+          32:
+            sprite: Mobs/Species/Human/displacement.rsi
+            state: jumpsuit-female
+  - type: EntityTableContainerFill
+    containers:
+      body_organs: !type:AllSelector
+        children:
+        - id: OFMOrganGingerbreadTorso
+        - id: OFMOrganGingerbreadHead
+        - id: OFMOrganGingerbreadArmLeft
+        - id: OFMOrganGingerbreadArmRight
+        - id: OFMOrganGingerbreadHandRight
+        - id: OFMOrganGingerbreadHandLeft
+        - id: OFMOrganGingerbreadLegLeft
+        - id: OFMOrganGingerbreadLegRight
+        - id: OFMOrganGingerbreadFootLeft
+        - id: OFMOrganGingerbreadFootRight
+        - id: OFMOrganGingerbreadBrain
+        - id: OFMOrganGingerbreadEyes
+        - id: OFMOrganGingerbreadTongue
+        - id: OFMOrganGingerbreadAppendix
+        - id: OFMOrganGingerbreadEars
+        - id: OFMOrganGingerbreadLungs
+        - id: OFMOrganGingerbreadHeart
+        - id: OFMOrganGingerbreadStomach
+        - id: OFMOrganGingerbreadLiver
+        - id: OFMOrganGingerbreadKidneys
+
+- type: entity
+  parent:
+  - OFMAppearanceGingerbread
+  - OFMNuristMob
+  id: OFMMobGingerbread
+
+- type: entity
+  parent: OFMOrganBase
+  id: OFMOrganGingerbread
+  abstract: true
+  suffix: gingerbread
+
+- type: entity
+  parent: OFMOrganGingerbread
+  id: OFMOrganGingerbreadVisual
+  abstract: true
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Species/Gingerbread/parts.rsi
+  - type: OFMVisualOrganMarkings
+    markingData:
+      group: Human
+
+- type: entity
+  parent: [ OFMOrganBaseTorso, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadTorso
+
+- type: entity
+  parent: [ OFMOrganBaseHead, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadHead
+
+- type: entity
+  parent: [ OFMOrganBaseArmLeft, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadArmLeft
+
+- type: entity
+  parent: [ OFMOrganBaseArmRight, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadArmRight
+
+- type: entity
+  parent: [ OFMOrganBaseHandLeft, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadHandLeft
+
+- type: entity
+  parent: [ OFMOrganBaseHandRight, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadHandRight
+
+- type: entity
+  parent: [ OFMOrganBaseLegLeft, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadLegLeft
+
+- type: entity
+  parent: [ OFMOrganBaseLegRight, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadLegRight
+
+- type: entity
+  parent: [ OFMOrganBaseFootLeft, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadFootLeft
+
+- type: entity
+  parent: [ OFMOrganBaseFootRight, OFMOrganGingerbreadVisual ]
+  id: OFMOrganGingerbreadFootRight
+
+- type: entity
+  parent: [ OFMOrganBaseBrain, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadBrain
+
+- type: entity
+  parent: [ OFMOrganGingerbreadVisual, OFMOrganBaseEyes ]
+  name: eyes
+  id: OFMOrganGingerbreadEyes
+  components:
+  - type: OFMVisualOrgan
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: no_eyes
+
+- type: entity
+  parent: [ OFMOrganBaseTongue, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadTongue
+
+- type: entity
+  parent: [ OFMOrganBaseAppendix, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadAppendix
+
+- type: entity
+  parent: [ OFMOrganBaseEars, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadEars
+
+- type: entity
+  parent: [ OFMOrganBaseLungs, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadLungs
+
+- type: entity
+  parent: [ OFMOrganBaseHeart, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadHeart
+
+- type: entity
+  parent: [ OFMOrganBaseStomach, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadStomach
+
+- type: entity
+  parent: [ OFMOrganBaseLiver, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadLiver
+
+- type: entity
+  parent: [ OFMOrganBaseKidneys, OFMOrganGingerbread ]
+  id: OFMOrganGingerbreadKidneys

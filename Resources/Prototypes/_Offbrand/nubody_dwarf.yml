@@ -1,0 +1,12 @@
+- type: entity
+  parent: OFMAppearanceHuman
+  id: OFMAppearanceDwarf
+  components:
+  - type: ScaleVisuals
+    scale: 1, 0.8
+
+- type: entity
+  parent:
+  - OFMAppearanceDwarf
+  - OFMNuristMob
+  id: OFMMobDwarf

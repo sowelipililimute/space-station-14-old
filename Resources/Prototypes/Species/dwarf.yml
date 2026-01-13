@@ -2,8 +2,27 @@
   id: Dwarf
   name: species-name-dwarf
   roundStart: true
-  prototype: MobDwarf
-  sprites: MobHumanSprites
-  markingLimits: MobHumanMarkingLimits
-  dollPrototype: MobDwarfDummy
   skinColoration: HumanToned
+  mobPrototype: OFMMobDwarf
+  appearancePrototype: OFMAppearanceDwarf
+  organs:
+    Torso: OFMOrganHumanTorso
+    Head: OFMOrganHumanHead
+    ArmLeft: OFMOrganHumanArmLeft
+    ArmRight: OFMOrganHumanArmRight
+    HandRight: OFMOrganHumanHandRight
+    HandLeft: OFMOrganHumanHandLeft
+    LegLeft: OFMOrganHumanLegLeft
+    LegRight: OFMOrganHumanLegRight
+    FootLeft: OFMOrganHumanFootLeft
+    FootRight: OFMOrganHumanFootRight
+    Brain: OFMOrganHumanBrain
+    Eyes: OFMOrganHumanEyes
+    Tongue: OFMOrganHumanTongue
+    Appendix: OFMOrganHumanAppendix
+    Ears: OFMOrganHumanEars
+    Lungs: OFMOrganHumanLungs
+    Heart: OFMOrganHumanHeart
+    Stomach: OFMOrganHumanStomach
+    Liver: OFMOrganHumanLiver
+    Kidneys: OFMOrganHumanKidneys
