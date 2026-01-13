@@ -20,7 +20,7 @@ public sealed partial class OFMVisualOrganMarkingsComponent : Component
     /// The list of markings to apply to the entity
     /// </summary>
     [DataField, AutoNetworkedField]
-    public List<Marking> Markings = new();
+    public Dictionary<HumanoidVisualLayers, List<Marking>> Markings = new();
 
     /// <summary>
     /// Client only - the last markings applied by this component

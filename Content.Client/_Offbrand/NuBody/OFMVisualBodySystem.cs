@@ -90,7 +90,7 @@ public sealed class OFMVisualBodySystem : SharedOFMVisualBodySystem
         ApplyVisual(ent, body);
     }
 
-    protected override void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, List<Marking> markings)
+    protected override void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, Dictionary<HumanoidVisualLayers, List<Marking>> markings)
     {
         base.SetOrganMarkings(ent, markings);
 
@@ -113,38 +113,44 @@ public sealed class OFMVisualBodySystem : SharedOFMVisualBodySystem
 
     private void ApplyMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, EntityUid target)
     {
-        foreach (var marking in ent.Comp.Markings)
+        var applied = new List<Marking>();
+        foreach (var markings in ent.Comp.Markings.Values)
         {
-            if (!_marking.TryGetMarking(marking, out var proto))
-                continue;
-
-            if (!_sprite.LayerMapTryGet(target, proto.BodyPart, out var index, true))
-                continue;
-
-            for (var i = 0; i < proto.Sprites.Count; i++)
+            foreach (var marking in markings)
             {
-                var sprite = proto.Sprites[i];
-
-                DebugTools.Assert(sprite is SpriteSpecifier.Rsi);
-                if (sprite is not SpriteSpecifier.Rsi rsi)
+                if (!_marking.TryGetMarking(marking, out var proto))
                     continue;
 
-                var layerID = $"{proto.ID}-{rsi.RsiState}";
+                if (!_sprite.LayerMapTryGet(target, proto.BodyPart, out var index, true))
+                    continue;
 
-                if (!_sprite.LayerMapTryGet(target, layerID, out _, false))
+                for (var i = 0; i < proto.Sprites.Count; i++)
                 {
-                    var layer = _sprite.AddLayer(target, sprite, index + i + 1);
-                    _sprite.LayerMapSet(target, layerID, layer);
-                    _sprite.LayerSetSprite(target, layerID, rsi);
+                    var sprite = proto.Sprites[i];
+
+                    DebugTools.Assert(sprite is SpriteSpecifier.Rsi);
+                    if (sprite is not SpriteSpecifier.Rsi rsi)
+                        continue;
+
+                    var layerID = $"{proto.ID}-{rsi.RsiState}";
+
+                    if (!_sprite.LayerMapTryGet(target, layerID, out _, false))
+                    {
+                        var layer = _sprite.AddLayer(target, sprite, index + i + 1);
+                        _sprite.LayerMapSet(target, layerID, layer);
+                        _sprite.LayerSetSprite(target, layerID, rsi);
+                    }
+
+                    if (marking.MarkingColors is not null && i < marking.MarkingColors.Count)
+                        _sprite.LayerSetColor(target, layerID, marking.MarkingColors[i]);
+                    else
+                        _sprite.LayerSetColor(target, layerID, Color.White);
                 }
 
-                if (marking.MarkingColors is not null && i < marking.MarkingColors.Count)
-                    _sprite.LayerSetColor(target, layerID, marking.MarkingColors[i]);
-                else
-                    _sprite.LayerSetColor(target, layerID, Color.White);
+                applied.Add(marking);
             }
         }
-        ent.Comp.AppliedMarkings = ent.Comp.Markings;
+        ent.Comp.AppliedMarkings = applied;
     }
 
     private void RemoveMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, EntityUid target)
@@ -173,26 +179,29 @@ public sealed class OFMVisualBodySystem : SharedOFMVisualBodySystem
 
     private void OnMarkingsChangedVisibility(Entity<OFMVisualOrganMarkingsComponent> ent, ref BodyRelayedEvent<HumanoidLayerVisibilityChangedEvent> args)
     {
-        foreach (var marking in ent.Comp.Markings)
+        foreach (var markings in ent.Comp.Markings.Values)
         {
-            if (!_marking.TryGetMarking(marking, out var proto))
-                continue;
-
-            if (proto.BodyPart != args.Args.Layer)
-                continue;
-
-            foreach (var sprite in proto.Sprites)
+            foreach (var marking in markings)
             {
-                DebugTools.Assert(sprite is SpriteSpecifier.Rsi);
-                if (sprite is not SpriteSpecifier.Rsi rsi)
+                if (!_marking.TryGetMarking(marking, out var proto))
                     continue;
 
-                var layerID = $"{proto.ID}-{rsi.RsiState}";
-
-                if (!_sprite.LayerMapTryGet(args.Body.Owner, layerID, out var index, true))
+                if (proto.BodyPart != args.Args.Layer)
                     continue;
 
-                _sprite.LayerSetVisible(args.Body.Owner, index, args.Args.Visible);
+                foreach (var sprite in proto.Sprites)
+                {
+                    DebugTools.Assert(sprite is SpriteSpecifier.Rsi);
+                    if (sprite is not SpriteSpecifier.Rsi rsi)
+                        continue;
+
+                    var layerID = $"{proto.ID}-{rsi.RsiState}";
+
+                    if (!_sprite.LayerMapTryGet(args.Body.Owner, layerID, out var index, true))
+                        continue;
+
+                    _sprite.LayerSetVisible(args.Body.Owner, index, args.Args.Visible);
+                }
             }
         }
     }

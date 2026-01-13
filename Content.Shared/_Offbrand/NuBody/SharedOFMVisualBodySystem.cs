@@ -7,6 +7,7 @@ using Robust.Shared.Containers;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._Offbrand.NuBody;
 
@@ -74,7 +75,7 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
         Dirty(ent);
     }
 
-    protected virtual void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, List<Marking> markings)
+    protected virtual void SetOrganMarkings(Entity<OFMVisualOrganMarkingsComponent> ent, Dictionary<HumanoidVisualLayers, List<Marking>> markings)
     {
         ent.Comp.Markings = markings;
         Dirty(ent);
@@ -151,24 +152,30 @@ public abstract partial class SharedOFMVisualBodySystem : EntitySystem
         if (!args.Args.Markings.TryGetValue(category, out var markingSet))
             return;
 
-        var organMarkings = new List<Marking>();
+        var organMarkings = ent.Comp.Markings.ShallowClone();
 
         foreach (var layer in ent.Comp.MarkingData.Layers)
         {
             if (!markingSet.TryGetValue(layer, out var markings))
                 continue;
 
+            var okSet = new List<Marking>();
+
             foreach (var marking in markings)
             {
                 if (!_marking.TryGetMarking(marking, out var proto))
                     continue;
 
-                organMarkings.Add(marking);
+                okSet.Add(marking);
             }
+
+            organMarkings[layer] = okSet;
         }
 
         var profile = Comp<OFMVisualOrganComponent>(ent).Profile;
-        var resolved = ResolveMarkings(organMarkings, profile.SkinColor, profile.EyeColor);
+        var resolved = organMarkings.ToDictionary(
+            kvp => kvp.Key,
+            kvp => ResolveMarkings(kvp.Value, profile.SkinColor, profile.EyeColor));
 
         SetOrganMarkings(ent, resolved);
     }

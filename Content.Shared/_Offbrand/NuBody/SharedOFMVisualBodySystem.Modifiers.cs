@@ -66,24 +66,13 @@ public abstract partial class SharedOFMVisualBodySystem
 
             if (TryComp<OFMVisualOrganComponent>(organ, out var visualOrgan))
             {
-                profiles[category] = visualOrgan.Profile;
+                profiles.Add(category, visualOrgan.Profile);
             }
 
             if (TryComp<OFMVisualOrganMarkingsComponent>(organ, out var visualOrganMarkings))
             {
-                markings[category] = visualOrganMarkings.MarkingData;
-
-                var dict = new Dictionary<HumanoidVisualLayers, List<Marking>>();
-                foreach (var marking in visualOrganMarkings.Markings)
-                {
-                    if (!_marking.TryGetMarking(marking, out var markingData))
-                        continue;
-
-                    dict[markingData.BodyPart] = dict.GetValueOrDefault(markingData.BodyPart) ?? [];
-                    dict[markingData.BodyPart].Add(marking);
-                }
-
-                applied[category] = dict;
+                markings.Add(category, visualOrganMarkings.MarkingData);
+                applied.Add(category, visualOrganMarkings.Markings);
             }
         }
     }
