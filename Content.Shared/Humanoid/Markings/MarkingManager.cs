@@ -379,6 +379,33 @@ public sealed class MarkingManager
         return true;
     }
 
+    public Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> ConvertMarkings(List<Marking> markings,
+        ProtoId<SpeciesPrototype> species)
+    {
+        var ret = new Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>>();
+
+        var data = GetMarkingData(species);
+        var layersToOrgans = data.SelectMany(kvp => kvp.Value.Layers.Select(layer => (layer, kvp.Key))).ToDictionary(pair => pair.layer, pair => pair.Key);
+
+        foreach (var marking in markings)
+        {
+            if (!_prototype.TryIndex<MarkingPrototype>(marking.MarkingId, out var markingProto))
+                continue;
+
+            if (!layersToOrgans.TryGetValue(markingProto.BodyPart, out var organ))
+                continue;
+
+            var organDict = ret.GetValueOrDefault(organ) ?? [];
+            ret[organ] = organDict;
+            var markingList = organDict.GetValueOrDefault(markingProto.BodyPart) ?? [];
+            organDict[markingProto.BodyPart] = markingList;
+
+            markingList.Add(marking);
+        }
+
+        return ret;
+    }
+
     public bool MustMatchSkin(string species, HumanoidVisualLayers layer, out float alpha, IPrototypeManager? prototypeManager = null)
     {
         alpha = 1;
