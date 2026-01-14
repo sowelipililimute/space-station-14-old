@@ -42,31 +42,6 @@ public sealed partial class MarkingPicker : Control
     private Sex _currentSex = Sex.Unsexed;
     public Color CurrentSkinColor = Color.White;
     public Color CurrentEyeColor = Color.Black;
-    public Marking? HairMarking;
-    public Marking? FacialHairMarking;
-
-    private readonly HashSet<MarkingCategories> _ignoreCategories = new();
-
-    public string IgnoreCategories
-    {
-        get => string.Join(',',  _ignoreCategories);
-        set
-        {
-            _ignoreCategories.Clear();
-            var split = value.Split(',');
-            foreach (var category in split)
-            {
-                if (!Enum.TryParse(category, out MarkingCategories categoryParse))
-                {
-                    continue;
-                }
-
-                _ignoreCategories.Add(categoryParse);
-            }
-
-            SetupCategoryButtons();
-        }
-    }
 
     public bool Forced { get; set; }
 
@@ -157,8 +132,7 @@ public sealed partial class MarkingPicker : Control
         {
             var category = _markingCategories[i];
             var markings = GetMarkings(category);
-            if (_ignoreCategories.Contains(category) ||
-                markings.Count == 0)
+            if (markings.Count == 0)
             {
                 continue;
             }
@@ -477,14 +451,6 @@ public sealed partial class MarkingPicker : Control
 
         // We need add hair markings in cloned set manually because _currentMarkings doesn't have it
         var markingSet = new MarkingSet(_currentMarkings);
-        if (HairMarking != null)
-        {
-            markingSet.AddBack(MarkingCategories.Hair, HairMarking);
-        }
-        if (FacialHairMarking != null)
-        {
-            markingSet.AddBack(MarkingCategories.FacialHair, FacialHairMarking);
-        }
 
         if (!_markingManager.MustMatchSkin(_currentSpecies, marking.BodyPart, out var _, _prototypeManager))
         {

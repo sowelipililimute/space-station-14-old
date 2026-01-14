@@ -234,6 +234,17 @@ namespace Content.Server.Database
                 }
             }
 
+            if (profile.FacialHairName is { } facialHairName && profile.FacialHairColor is { } facialHairColor)
+            {
+                if (Marking.ParseFromDbString($"{facialHairName}@{facialHairColor}") is { } marking)
+                    markings.Add(marking);
+            }
+            else if (profile.HairName is { } hairName && profile.HairColor is { } hairColor)
+            {
+                if (Marking.ParseFromDbString($"{hairName}@{hairColor}") is { } marking)
+                    markings.Add(marking);
+            }
+
             var loadouts = new Dictionary<string, RoleLoadout>();
 
             foreach (var role in profile.Loadouts)
@@ -267,10 +278,6 @@ namespace Content.Server.Database
                 gender,
                 new HumanoidCharacterAppearance
                 (
-                    profile.HairName,
-                    Color.FromHex(profile.HairColor),
-                    profile.FacialHairName,
-                    Color.FromHex(profile.FacialHairColor),
                     Color.FromHex(profile.EyeColor),
                     Color.FromHex(profile.SkinColor),
                     markings
@@ -301,10 +308,10 @@ namespace Content.Server.Database
             profile.Age = humanoid.Age;
             profile.Sex = humanoid.Sex.ToString();
             profile.Gender = humanoid.Gender.ToString();
-            profile.HairName = appearance.HairStyleId;
-            profile.HairColor = appearance.HairColor.ToHex();
-            profile.FacialHairName = appearance.FacialHairStyleId;
-            profile.FacialHairColor = appearance.FacialHairColor.ToHex();
+            profile.HairName = null;
+            profile.HairColor = null;
+            profile.FacialHairName = null;
+            profile.FacialHairColor = null;
             profile.EyeColor = appearance.EyeColor.ToHex();
             profile.SkinColor = appearance.SkinColor.ToHex();
             profile.SpawnPriority = (int) humanoid.SpawnPriority;
