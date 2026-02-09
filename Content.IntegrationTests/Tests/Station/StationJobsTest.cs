@@ -2,13 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Content.Server.Station.Components;
 using Content.Server.Station.Systems;
+using Content.Shared.GameTicking;
 using Content.Shared.Maps;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
+using Content.Shared.Station;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Log;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests.Station;
@@ -247,6 +250,167 @@ public sealed class StationJobsTest
                 }
             });
         });
+        await pair.CleanReturnAsync();
+    }
+
+    private static readonly string[] GameMaps =
+    [
+        "Bagel",
+        "Box",
+        "Elkridge",
+        "Fland",
+        "Marathon",
+        "Oasis",
+        "Packed",
+        "Plasma",
+        "Relic",
+        "Snowball",
+        "Reach",
+        "Exo",
+    ];
+
+    private Dictionary<ProtoId<JobPrototype>, ProtoId<DepartmentPrototype>> DepartmentsByJob(IPrototypeManager proto)
+    {
+        var departmentsByJob = new Dictionary<ProtoId<JobPrototype>, ProtoId<DepartmentPrototype>>();
+        foreach (var department in proto.EnumeratePrototypes<DepartmentPrototype>())
+        {
+            if (!department.Primary)
+                continue;
+
+            foreach (var job in department.Roles)
+            {
+                departmentsByJob[job] = department.ID;
+            }
+        }
+
+        return departmentsByJob;
+    }
+
+    [Test]
+    [TestCaseSource(nameof(GameMaps))]
+    public async Task JobInterleavingTest(string mapId)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+
+        await pair.Server.WaitIdleAsync();
+
+        var proto = pair.Server.ResolveDependency<IPrototypeManager>();
+        var componentFactory = pair.Server.ResolveDependency<IComponentFactory>();
+        var departmentsByJob = DepartmentsByJob(proto);
+
+        var map = proto.Index<GameMapPrototype>(mapId);
+        foreach (var station in map.Stations.Values)
+        {
+            if (!station.StationComponentOverrides.TryGetComponent<StationJobsComponent>(componentFactory, out var stationJobs))
+                continue;
+
+            var jobCountsByDepartment = new Dictionary<ProtoId<DepartmentPrototype>, int>();
+            var jobsToSelect = stationJobs.SetupAvailableJobs.Keys;
+            foreach (var job in jobsToSelect)
+            {
+                if (!departmentsByJob.TryGetValue(job, out var department))
+                    continue;
+
+                jobCountsByDepartment[department] = jobCountsByDepartment.GetValueOrDefault(department) + 1;
+            }
+
+            await pair.Server.WaitAssertion(() =>
+            {
+                var jobs = pair.Server.System<StationJobsSystem>();
+                jobs.InitializeRoundStart();
+                var interleavedJobs = jobs.Interleaved(jobsToSelect).ToList();
+                TestContext.Out.WriteLine($"Station {station.StationPrototype} has the following jobs: {string.Join(", ", interleavedJobs.Select(it => it.Id))}");
+
+                for (var i = 0; i < interleavedJobs.Count; i++)
+                {
+                    var job = interleavedJobs[i];
+                    if (!departmentsByJob.TryGetValue(job, out var department))
+                        continue;
+
+                    var expectedLastIndex = jobCountsByDepartment[department] * jobCountsByDepartment.Count;
+                    Assert.That(expectedLastIndex, Is.GreaterThanOrEqualTo(i), $"all jobs in department {department} should have been seen before {expectedLastIndex}, but {job} was found at {i}");
+                }
+            });
+        }
+
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    [TestCaseSource(nameof(GameMaps))]
+    public async Task PigeonholeTest(string mapId)
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+
+        var proto = server.ResolveDependency<IPrototypeManager>();
+        var random = server.ResolveDependency<IRobustRandom>();
+        var map = proto.Index<GameMapPrototype>(mapId);
+        var stationSystem = server.System<StationSystem>();
+        var stationJobsSystem = server.System<StationJobsSystem>();
+        var componentFactory = pair.Server.ResolveDependency<IComponentFactory>();
+        var departmentsByJob = DepartmentsByJob(proto);
+
+        var stations = new List<(StationConfig, EntityUid)>();
+        await server.WaitPost(() =>
+        {
+            foreach (var config in map.Stations.Values)
+            {
+                stations.Add((config, stationSystem.InitializeNewStation(config, null)));
+            }
+        });
+
+        await server.WaitAssertion(() =>
+        {
+            foreach (var (station, entity) in stations)
+            {
+                if (!station.StationComponentOverrides.TryGetComponent<StationJobsComponent>(componentFactory, out var stationJobs))
+                    continue;
+
+                var jobsByDepartment = new Dictionary<ProtoId<DepartmentPrototype>, List<ProtoId<JobPrototype>>>();
+                foreach (var job in stationJobs.SetupAvailableJobs.Keys)
+                {
+                    if (!departmentsByJob.TryGetValue(job, out var department))
+                        continue;
+
+                    // We can only enforce the pigeonhole invariant for jobs that are all the same weight.
+                    // Most jobs are 0-weighted, so...
+                    if (proto.Index(job).Weight != 0)
+                        continue;
+
+                    jobsByDepartment[department] = jobsByDepartment.GetValueOrDefault(department) ?? [];
+                    jobsByDepartment[department].Add(job);
+                }
+
+                var fakePlayers = new Dictionary<NetUserId, HumanoidCharacterProfile>();
+
+                var allJobs = new HashSet<ProtoId<JobPrototype>>();
+                foreach (var departmentJobs in jobsByDepartment.Values)
+                {
+                    var expectedJob = random.Pick(departmentJobs);
+                    var anotherJob = random.Pick(random.Pick(jobsByDepartment).Value);
+                    allJobs.Add(expectedJob);
+                    allJobs.Add(anotherJob);
+                    fakePlayers[new NetUserId(Guid.NewGuid())] = HumanoidCharacterProfile.Random()
+                        .WithJobPriority(expectedJob, JobPriority.High)
+                        .WithJobPriority(anotherJob, JobPriority.Medium)
+                        .WithJobPriority(SharedGameTicker.FallbackOverflowJob, JobPriority.Never)
+                        .WithPreferenceUnavailable(PreferenceUnavailableMode.StayInLobby);
+                }
+
+                var assigned = stationJobsSystem.AssignJobs(fakePlayers, [entity]);
+
+                TestContext.Out.WriteLine($"Station {station.StationPrototype} on map {mapId} wants to evenly balance the following departments: {string.Join(", ", jobsByDepartment.Keys.OrderBy(it => it.Id))}");
+                TestContext.Out.WriteLine($"Station {station.StationPrototype} on map {mapId} is allocating to the following jobs: {string.Join(", ", allJobs.OrderBy(it => it.Id))}");
+                TestContext.Out.WriteLine($"Station {station.StationPrototype} on map {mapId} has the following jobs assigned: {string.Join(", ", assigned.Values.Select(it => it.Item1?.Id ?? "BadJob").Order())}");
+
+                foreach (var (department, jobs) in jobsByDepartment)
+                {
+                    Assert.That(assigned.Values.Any(assignment => assignment.Item1 is { } job && jobs.Contains(job)), $"Department {department} was not assigned a job in {station.StationPrototype} station on {mapId} map even though it should've been possible to");
+                }
+            }
+        });
+
         await pair.CleanReturnAsync();
     }
 }

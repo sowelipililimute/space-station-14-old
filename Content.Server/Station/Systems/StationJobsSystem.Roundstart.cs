@@ -23,11 +23,12 @@ public sealed partial class StationJobsSystem
 
     private Dictionary<int, HashSet<string>> _jobsByWeight = default!;
     private List<int> _orderedWeights = default!;
+    private Dictionary<ProtoId<JobPrototype>, ProtoId<DepartmentPrototype>> _departmentsByJob = new();
 
     /// <summary>
     /// Sets up some tables used by AssignJobs, including jobs sorted by their weights, and a list of weights in order from highest to lowest.
     /// </summary>
-    private void InitializeRoundStart()
+    internal void InitializeRoundStart()
     {
         _jobsByWeight = new Dictionary<int, HashSet<string>>();
         foreach (var job in _prototypeManager.EnumeratePrototypes<JobPrototype>())
@@ -37,8 +38,69 @@ public sealed partial class StationJobsSystem
 
             _jobsByWeight[job.Weight].Add(job.ID);
         }
+        _departmentsByJob.Clear();
+        foreach (var department in _prototypeManager.EnumeratePrototypes<DepartmentPrototype>())
+        {
+            if (!department.Primary)
+                continue;
+
+            foreach (var role in department.Roles)
+            {
+                _departmentsByJob[role] = department;
+            }
+        }
 
         _orderedWeights = _jobsByWeight.Keys.OrderByDescending(i => i).ToList();
+    }
+
+    internal IEnumerable<ProtoId<JobPrototype>> Interleaved(IEnumerable<ProtoId<JobPrototype>> jobs)
+    {
+        var allocatedDepartments = new Dictionary<ProtoId<DepartmentPrototype>, int>();
+        var jobsByDepartment = new List<List<ProtoId<JobPrototype>>>();
+        var nonDepartmentalJobs = new List<ProtoId<JobPrototype>>();
+
+        foreach (var job in jobs)
+        {
+            if (!_departmentsByJob.TryGetValue(job, out var department))
+            {
+                nonDepartmentalJobs.Add(job);
+                continue;
+            }
+            if (allocatedDepartments.TryGetValue(department, out var idx))
+            {
+                jobsByDepartment[idx].Add(job);
+                continue;
+            }
+
+            idx = jobsByDepartment.Count;
+            allocatedDepartments[department] = idx;
+            jobsByDepartment.Add([job]);
+        }
+
+        var randomDepartments = allocatedDepartments.Keys.ToList();
+        _random.Shuffle(randomDepartments);
+        foreach (var department in jobsByDepartment)
+        {
+            _random.Shuffle(department);
+        }
+
+        var largestDepartmentCount = jobsByDepartment.Select(list => list.Count).Max();
+        for (var i = 0; i < largestDepartmentCount; i++)
+        {
+            foreach (var department in randomDepartments)
+            {
+                var departmentList = jobsByDepartment[allocatedDepartments[department]];
+                if (i < departmentList.Count)
+                {
+                    yield return departmentList[i];
+                }
+            }
+        }
+
+        foreach (var job in nonDepartmentalJobs)
+        {
+            yield return job;
+        }
     }
 
     /// <summary>
@@ -223,10 +285,8 @@ public sealed partial class StationJobsSystem
 
                     // The jobs we're selecting from for the current station.
                     var currStationSelectingJobs = currentlySelectingJobs[station];
-                    // We only need this list because we need to go through this in a random order.
-                    // Oh the misery, another allocation.
-                    var allJobs = currStationSelectingJobs.Keys.ToList();
-                    _random.Shuffle(allJobs);
+                    // We only need this list because we need to go through this in a random-by-department order.
+                    var allJobs = Interleaved(currStationSelectingJobs.Keys).ToList();
                     // And iterates through all it's jobs in a random order until the count settles.
                     // No, AFAIK it cannot be done any saner than this. I hate "shaking" collections as much
                     // as you do but it's what seems to be the absolute best option here.
@@ -365,7 +425,7 @@ public sealed partial class StationJobsSystem
                 if (!_prototypeManager.Resolve(jobId, out var job))
                     continue;
 
-                if (!job.CanBeAntag && (!_player.TryGetSessionById(player, out var session) || antagBlocked.Contains(session)))
+                if (!job.CanBeAntag && _player.TryGetSessionById(player, out var session) && antagBlocked.Contains(session))
                     continue;
 
                 if (weight is not null && job.Weight != weight.Value)
