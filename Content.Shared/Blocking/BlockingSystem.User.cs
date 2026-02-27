@@ -54,7 +54,7 @@ public sealed partial class BlockingSystem
 
         var blockFraction = blocking.IsBlocking ? blocking.ActiveBlockFraction : blocking.PassiveBlockFraction;
         blockFraction = Math.Clamp(blockFraction, 0, 1);
-        _damageable.TryChangeDamage((item, dmgComp), blockFraction * args.OriginalDamage);
+        _damageable.TryChangeDamage((item, dmgComp), new Attack(blockFraction * args.OriginalDamage));
 
         var modify = new DamageModifierSet();
         foreach (var key in dmgComp.Damage.DamageDict.Keys)

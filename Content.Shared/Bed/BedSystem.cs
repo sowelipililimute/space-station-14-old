@@ -3,6 +3,7 @@ using Content.Shared.Bed.Components;
 using Content.Shared.Bed.Sleep;
 using Content.Shared.Body.Events;
 using Content.Shared.Buckle.Components;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Emag.Systems;
 using Content.Shared.Metabolism;
@@ -158,7 +159,7 @@ public sealed class BedSystem : EntitySystem
                 if (_sleepingQuery.HasComp(healedEntity))
                     damage *= bedComponent.SleepMultiplier;
 
-                _damageableSystem.TryChangeDamage(healedEntity, damage, true, origin: uid);
+                _damageableSystem.TryChangeDamage(healedEntity, new Attack(damage, true, Origin: uid));
             }
         }
     }

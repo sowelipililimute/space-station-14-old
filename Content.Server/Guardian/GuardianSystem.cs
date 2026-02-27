@@ -1,5 +1,6 @@
 using Content.Server.Popups;
 using Content.Shared.Actions;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.Examine;
@@ -287,10 +288,10 @@ namespace Content.Server.Guardian
 
             _damageSystem.ChangeDamage(
                 component.Host.Value,
-                args.DamageDelta * component.DamageShare,
-                origin: args.Origin,
-                ignoreResistances: true,
-                interruptsDoAfters: false);
+                new Attack(args.DamageDelta * component.DamageShare,
+                    Origin: args.Origin,
+                    IgnoreResistances: true,
+                    InterruptsDoAfters: false));
             _popupSystem.PopupEntity(Loc.GetString("guardian-entity-taking-damage"), component.Host.Value, component.Host.Value);
 
         }

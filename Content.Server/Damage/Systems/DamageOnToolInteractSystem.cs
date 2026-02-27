@@ -35,7 +35,7 @@ namespace Content.Server.Damage.Systems
             && itemToggle.Activated
             && !welder.TankSafe)
             {
-                if (_damageableSystem.TryChangeDamage(args.Target, weldingDamage, out var dmg, origin: args.User))
+                if (_damageableSystem.TryChangeDamage(args.Target, new Attack(weldingDamage, Origin: args.User), out var dmg))
                 {
                     _adminLogger.Add(LogType.Damaged,
                         $"{ToPrettyString(args.User):user} used {ToPrettyString(args.Used):used} as a welder to deal {dmg.GetTotal():damage} damage to {ToPrettyString(args.Target):target}");
@@ -46,7 +46,7 @@ namespace Content.Server.Damage.Systems
             else if (component.DefaultDamage is {} damage
                 && _toolSystem.HasQuality(args.Used, component.Tools))
             {
-                if (_damageableSystem.TryChangeDamage(args.Target, damage, out var dmg, origin: args.User))
+                if (_damageableSystem.TryChangeDamage(args.Target, new Attack(damage, Origin: args.User), out var dmg))
                 {
                     _adminLogger.Add(LogType.Damaged,
                         $"{ToPrettyString(args.User):user} used {ToPrettyString(args.Used):used} as a tool to deal {dmg.GetTotal():damage} damage to {ToPrettyString(args.Target):target}");

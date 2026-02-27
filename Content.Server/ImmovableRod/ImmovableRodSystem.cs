@@ -3,6 +3,7 @@ using Content.Server.Polymorph.Components;
 using Content.Server.Popups;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Body;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
 using Content.Shared.Examine;
@@ -126,7 +127,7 @@ public sealed class ImmovableRodSystem : EntitySystem
                 if (component.Damage == null)
                     return;
 
-                _damageable.TryChangeDamage(ent, component.Damage, ignoreResistances: true);
+                _damageable.TryChangeDamage(ent, new Attack(component.Damage, IgnoreResistances: true));
                 return;
             }
 

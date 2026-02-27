@@ -454,7 +454,7 @@ public sealed partial class ExplosionSystem
                     continue;
 
                 // TODO EXPLOSIONS turn explosions into entities, and pass the the entity in as the damage origin.
-                _damageableSystem.TryChangeDamage((entity, damageable), damage, ignoreResistances: true, ignoreGlobalModifiers: true);
+                _damageableSystem.TryChangeDamage((entity, damageable), new Attack(damage, IgnoreResistances: true, IgnoreGlobalModifiers: true));
 
                 if (_actorQuery.HasComp(entity))
                 {

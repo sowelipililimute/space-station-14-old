@@ -213,7 +213,7 @@ public sealed partial class RevenantSystem
             return;
         DamageSpecifier dspec = new();
         dspec.DamageDict.Add("Cold", damage.Value);
-        _damage.ChangeDamage(args.Args.Target.Value, dspec, true, origin: uid);
+        _damage.ChangeDamage(args.Args.Target.Value, new Attack(dspec, true, Origin: uid));
 
         args.Handled = true;
     }
@@ -263,7 +263,7 @@ public sealed partial class RevenantSystem
                 //hardcoded damage specifiers til i die.
                 var dspec = new DamageSpecifier();
                 dspec.DamageDict.Add("Structural", 60);
-                _damage.TryChangeDamage(ent, dspec, origin: uid);
+                _damage.TryChangeDamage(ent, new Attack(dspec, Origin: uid));
             }
 
             if (!_random.Prob(component.DefileEffectChance))

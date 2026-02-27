@@ -1,5 +1,6 @@
 using Content.Shared.Atmos.Rotting;
 using Content.Shared.Chat;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.DoAfter;
@@ -206,7 +207,7 @@ public abstract class SharedDefibrillatorSystem : EntitySystem
         else
         {
             if (_mobState.IsDead(target, targetMobState))
-                _damageable.TryChangeDamage(target, ent.Comp.ZapHeal, true, origin: user);
+                _damageable.TryChangeDamage(target, new Attack(ent.Comp.ZapHeal, true, Origin: user));
 
             if (TryComp<MobThresholdsComponent>(target, out var targetThresholds) &&
                 TryComp<DamageableComponent>(target, out var targetDamageable) &&

@@ -34,7 +34,7 @@ public sealed class DamageContactsSystem : EntitySystem
             damaged.NextSecond = _timing.CurTime + TimeSpan.FromSeconds(1);
 
             if (damaged.Damage != null)
-                _damageable.TryChangeDamage(ent, damaged.Damage, interruptsDoAfters: false);
+                _damageable.TryChangeDamage(ent, new Attack(damaged.Damage, InterruptsDoAfters: false));
         }
     }
 

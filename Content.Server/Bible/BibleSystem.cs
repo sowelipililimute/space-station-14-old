@@ -4,6 +4,7 @@ using Content.Server.Popups;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Actions;
 using Content.Shared.Bible;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Ghost.Roles.Components;
 using Content.Shared.IdentityManagement;
@@ -108,7 +109,7 @@ namespace Content.Server.Bible
                 _popupSystem.PopupEntity(Loc.GetString("bible-sizzle"), args.User, args.User);
 
                 _audio.PlayPvs(component.SizzleSoundPath, args.User);
-                _damageableSystem.TryChangeDamage(args.User, component.DamageOnUntrainedUse, true, origin: uid);
+                _damageableSystem.TryChangeDamage(args.User, new Attack(component.DamageOnUntrainedUse, true, Origin: uid));
                 _delay.TryResetDelay((uid, useDelay));
 
                 return;
@@ -129,7 +130,7 @@ namespace Content.Server.Bible
                     _popupSystem.PopupEntity(selfFailMessage, args.User, args.User, PopupType.MediumCaution);
 
                     _audio.PlayPvs(component.BibleHitSound, args.User);
-                    _damageableSystem.TryChangeDamage(args.Target.Value, component.DamageOnFail, true, origin: uid);
+                    _damageableSystem.TryChangeDamage(args.Target.Value, new Attack(component.DamageOnFail, true, Origin: uid));
                     _delay.TryResetDelay((uid, useDelay));
                     return;
                 }
@@ -138,7 +139,7 @@ namespace Content.Server.Bible
             string othersMessage;
             string selfMessage;
 
-            if (_damageableSystem.TryChangeDamage(args.Target.Value, component.Damage, true, origin: uid))
+            if (_damageableSystem.TryChangeDamage(args.Target.Value, new Attack(component.Damage, true, Origin: uid)))
             {
                 othersMessage = Loc.GetString(component.LocPrefix + "-heal-success-others", ("user", userEnt), ("target", targetEnt), ("bible", uid));
                 selfMessage = Loc.GetString(component.LocPrefix + "-heal-success-self", ("target", targetEnt), ("bible", uid));

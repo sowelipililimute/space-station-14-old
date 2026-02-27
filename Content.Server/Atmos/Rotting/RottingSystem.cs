@@ -2,6 +2,7 @@ using Content.Server.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Rotting;
 using Content.Shared.Body.Events;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Gibbing;
 using Content.Shared.Temperature.Components;
@@ -111,7 +112,7 @@ public sealed class RottingSystem : SharedRottingSystem
             if (rotting.DealDamage)
             {
                 var damage = rotting.Damage * rotting.RotUpdateRate.TotalSeconds;
-                _damageable.TryChangeDamage(uid, damage, true, false);
+                _damageable.TryChangeDamage(uid, new Attack(damage, true, false));
             }
 
             if (TryComp<RotIntoComponent>(uid, out var rotInto))

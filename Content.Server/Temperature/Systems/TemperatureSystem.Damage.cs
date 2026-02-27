@@ -2,6 +2,7 @@ using Content.Server.Administration.Logs;
 using Content.Server.Body.Components;
 using Content.Server.Temperature.Components;
 using Content.Shared.Alert;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
@@ -112,7 +113,7 @@ public sealed partial class TemperatureSystem
 
             var diff = Math.Abs(temperature.CurrentTemperature - heatDamageThreshold);
             var tempDamage = c / (1 + a * Math.Pow(Math.E, -heatK * diff)) - y;
-            _damageable.TryChangeDamage(entity.Owner, entity.Comp.HeatDamage * tempDamage * deltaTime.TotalSeconds, ignoreResistances: true, interruptsDoAfters: false);
+            _damageable.TryChangeDamage(entity.Owner, new Attack(entity.Comp.HeatDamage * tempDamage * deltaTime.TotalSeconds, IgnoreResistances: true, InterruptsDoAfters: false));
         }
         else if (temperature.CurrentTemperature <= coldDamageThreshold)
         {
@@ -125,7 +126,7 @@ public sealed partial class TemperatureSystem
             var diff = Math.Abs(temperature.CurrentTemperature - coldDamageThreshold);
             var tempDamage =
                 Math.Sqrt(diff * (Math.Pow(entity.Comp.DamageCap.Double(), 2) / coldDamageThreshold));
-            _damageable.TryChangeDamage(entity.Owner, entity.Comp.ColdDamage * tempDamage * deltaTime.TotalSeconds, ignoreResistances: true, interruptsDoAfters: false);
+            _damageable.TryChangeDamage(entity.Owner, new Attack(entity.Comp.ColdDamage * tempDamage * deltaTime.TotalSeconds, IgnoreResistances: true, InterruptsDoAfters: false));
         }
         else if (entity.Comp.TakingDamage)
         {

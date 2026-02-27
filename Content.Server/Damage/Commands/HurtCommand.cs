@@ -73,7 +73,7 @@ namespace Content.Server.Damage.Commands
                 func = (entity, ignoreResistances) =>
                 {
                     var damage = new DamageSpecifier(damageGroup, amount);
-                    _entManager.System<DamageableSystem>().TryChangeDamage(entity, damage, ignoreResistances);
+                    _entManager.System<DamageableSystem>().TryChangeDamage(entity, new Attack(damage, ignoreResistances));
                 };
 
                 return true;
@@ -85,7 +85,7 @@ namespace Content.Server.Damage.Commands
                 func = (entity, ignoreResistances) =>
                 {
                     var damage = new DamageSpecifier(damageType, amount);
-                    _entManager.System<DamageableSystem>().TryChangeDamage(entity, damage, ignoreResistances);
+                    _entManager.System<DamageableSystem>().TryChangeDamage(entity, new Attack(damage, ignoreResistances));
                 };
                 return true;
 

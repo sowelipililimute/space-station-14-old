@@ -13,6 +13,7 @@ using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.Manager;
 using System.Diagnostics.CodeAnalysis;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Item.ItemToggle;
 using Content.Shared.Item.ItemToggle.Components;
@@ -72,7 +73,7 @@ public abstract class SharedChameleonProjectorSystem : EntitySystem
     {
         // this mirrors damage 1:1
         if (args.DamageDelta is {} damage)
-            _damageable.TryChangeDamage(ent.Comp.User, damage);
+            _damageable.TryChangeDamage(ent.Comp.User, new Attack(damage));
     }
 
     private void OnDisguiseInsertAttempt(Entity<ChameleonDisguiseComponent> ent, ref InsertIntoEntityStorageAttemptEvent args)

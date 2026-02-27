@@ -1,4 +1,5 @@
 using Content.Shared.Administration.Logs;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
@@ -74,7 +75,7 @@ public sealed partial class RepairableSystem : EntitySystem
     /// <param name="user">who is doing the repair</param>
     private void RepairSomeDamage(Entity<DamageableComponent?> ent, Damage.DamageSpecifier damageAmount, EntityUid user)
     {
-        var damageChanged = _damageableSystem.ChangeDamage(ent.Owner, damageAmount, true, false, origin: user);
+        var damageChanged = _damageableSystem.ChangeDamage(ent.Owner, new Attack(damageAmount, true, false, Origin: user));
         _adminLogger.Add(LogType.Healed, $"{ToPrettyString(user):user} repaired {ToPrettyString(ent.Owner):target} by {damageChanged.GetTotal()}");
     }
 

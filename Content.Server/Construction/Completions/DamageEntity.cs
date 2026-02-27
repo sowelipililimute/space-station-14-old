@@ -18,6 +18,6 @@ public sealed partial class DamageEntity : IGraphAction
 
     public void PerformAction(EntityUid uid, EntityUid? userUid, IEntityManager entityManager)
     {
-        entityManager.System<DamageableSystem>().TryChangeDamage(uid, Damage, origin: userUid);
+        entityManager.System<DamageableSystem>().TryChangeDamage(uid, new Attack(Damage, Origin: userUid));
     }
 }

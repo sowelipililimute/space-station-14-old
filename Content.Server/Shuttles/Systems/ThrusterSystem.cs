@@ -2,6 +2,7 @@ using System.Numerics;
 using Content.Server.Audio;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Shuttles.Components;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
@@ -479,7 +480,7 @@ public sealed class ThrusterSystem : EntitySystem
 
             foreach (var uid in comp.Colliding.ToArray())
             {
-                _damageable.TryChangeDamage(uid, comp.Damage);
+                _damageable.TryChangeDamage(uid, new Attack(comp.Damage));
             }
         }
     }

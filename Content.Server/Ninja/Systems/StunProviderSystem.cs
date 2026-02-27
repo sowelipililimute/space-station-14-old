@@ -1,4 +1,5 @@
 using Content.Server.Ninja.Events;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Interaction;
 using Content.Shared.Ninja.Components;
@@ -60,7 +61,7 @@ public sealed class StunProviderSystem : SharedStunProviderSystem
 
         _audio.PlayPvs(comp.Sound, target);
 
-        _damageable.ChangeDamage(target, comp.StunDamage, origin: uid);
+        _damageable.ChangeDamage(target, new Attack(comp.StunDamage, Origin: uid));
         _stun.TryAddParalyzeDuration(target, comp.StunTime);
 
         // short cooldown to prevent instant stunlocking

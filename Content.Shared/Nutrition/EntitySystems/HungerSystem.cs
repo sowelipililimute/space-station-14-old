@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Content.Shared.Alert;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Systems;
@@ -175,7 +176,7 @@ public sealed class HungerSystem : EntitySystem
             component.StarvationDamage is { } damage &&
             !_mobState.IsDead(uid))
         {
-            _damageable.TryChangeDamage(uid, damage, true, false);
+            _damageable.TryChangeDamage(uid, new Attack(damage, true, false));
         }
     }
 

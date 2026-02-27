@@ -1,6 +1,7 @@
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Disposal.Tube;
 using Content.Shared.Body;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Disposal.Components;
 using Content.Shared.Item;
@@ -197,7 +198,7 @@ namespace Content.Server.Disposal.Unit
             {
                 foreach (var ent in holder.Container.ContainedEntities)
                 {
-                    _damageable.TryChangeDamage(ent, to.DamageOnTurn);
+                    _damageable.TryChangeDamage(ent, new Attack(to.DamageOnTurn));
                 }
                 _audio.PlayPvs(to.ClangSound, toUid);
             }

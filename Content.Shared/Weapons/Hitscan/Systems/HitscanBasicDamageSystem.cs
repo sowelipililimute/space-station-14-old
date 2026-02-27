@@ -1,3 +1,4 @@
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Weapons.Hitscan.Components;
 using Content.Shared.Weapons.Hitscan.Events;
@@ -22,7 +23,7 @@ public sealed class HitscanBasicDamageSystem : EntitySystem
 
         var dmg = ent.Comp.Damage * _damage.UniversalHitscanDamageModifier;
 
-        if(!_damage.TryChangeDamage(args.Data.HitEntity.Value, dmg, out var damageDealt, origin: args.Data.Gun))
+        if(!_damage.TryChangeDamage(args.Data.HitEntity.Value, new Attack(dmg, Origin: args.Data.Gun), out var damageDealt))
             return;
 
         var damageEvent = new HitscanDamageDealtEvent

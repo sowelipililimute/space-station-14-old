@@ -1,3 +1,4 @@
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Emag.Systems;
 using Content.Shared.Examine;
@@ -157,7 +158,7 @@ public abstract class SharedArtifactCrusherSystem : EntitySystem
                 var contents = new ValueList<EntityUid>(storage.Contents.ContainedEntities);
                 foreach (var contained in contents)
                 {
-                    _damageable.TryChangeDamage(contained, crusher.CrushingDamage);
+                    _damageable.TryChangeDamage(contained, new Attack(crusher.CrushingDamage));
                 }
                 crusher.NextSecond += TimeSpan.FromSeconds(1);
                 Dirty(uid, crusher);

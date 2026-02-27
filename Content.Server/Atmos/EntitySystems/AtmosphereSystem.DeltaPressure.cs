@@ -346,7 +346,7 @@ public sealed partial class AtmosphereSystem
         var maxPressureCapped = Math.Min(maxPressure, ent.Comp.MaxEffectivePressure);
         var appliedDamage = ScaleDamage(ent, ent.Comp.BaseDamage, maxPressureCapped);
 
-        _damage.ChangeDamage(ent.Owner, appliedDamage, ignoreResistances: true, interruptsDoAfters: false);
+        _damage.ChangeDamage(ent.Owner, new Attack(appliedDamage, IgnoreResistances: true, InterruptsDoAfters: false));
         SetIsTakingDamageState(ent, true);
     }
 

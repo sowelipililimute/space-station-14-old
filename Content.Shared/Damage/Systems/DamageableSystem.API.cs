@@ -66,16 +66,12 @@ public sealed partial class DamageableSystem
     /// </returns>
     public bool TryChangeDamage(
         Entity<DamageableComponent?> ent,
-        DamageSpecifier damage,
-        bool ignoreResistances = false,
-        bool interruptsDoAfters = true,
-        EntityUid? origin = null,
-        bool ignoreGlobalModifiers = false
+        Attack attack
     )
     {
         //! Empty just checks if the DamageSpecifier is _literally_ empty, as in, is internal dictionary of damage types is empty.
         // If you deal 0.0 of some damage type, Empty will be false!
-        return TryChangeDamage(ent, damage, out _, ignoreResistances, interruptsDoAfters, origin, ignoreGlobalModifiers);
+        return TryChangeDamage(ent, attack, out _);
     }
 
     /// <summary>
@@ -91,17 +87,13 @@ public sealed partial class DamageableSystem
     /// </returns>
     public bool TryChangeDamage(
         Entity<DamageableComponent?> ent,
-        DamageSpecifier damage,
-        out DamageSpecifier newDamage,
-        bool ignoreResistances = false,
-        bool interruptsDoAfters = true,
-        EntityUid? origin = null,
-        bool ignoreGlobalModifiers = false
+        Attack attack,
+        out DamageSpecifier newDamage
     )
     {
         //! Empty just checks if the DamageSpecifier is _literally_ empty, as in, is internal dictionary of damage types is empty.
         // If you deal 0.0 of some damage type, Empty will be false!
-        newDamage = ChangeDamage(ent, damage, ignoreResistances, interruptsDoAfters, origin, ignoreGlobalModifiers);
+        newDamage = ChangeDamage(ent, attack);
         return !newDamage.Empty;
     }
 
@@ -118,11 +110,7 @@ public sealed partial class DamageableSystem
     /// </returns>
     public DamageSpecifier ChangeDamage(
         Entity<DamageableComponent?> ent,
-        DamageSpecifier damage,
-        bool ignoreResistances = false,
-        bool interruptsDoAfters = true,
-        EntityUid? origin = null,
-        bool ignoreGlobalModifiers = false
+        Attack attack
     )
     {
         var damageDone = new DamageSpecifier();
@@ -130,17 +118,19 @@ public sealed partial class DamageableSystem
         if (!_damageableQuery.Resolve(ent, ref ent.Comp, false))
             return damageDone;
 
-        if (damage.Empty)
+        if (attack.Damages.Empty)
             return damageDone;
 
-        var before = new BeforeDamageChangedEvent(damage, origin);
+        var before = new BeforeDamageChangedEvent(attack.Damages, attack.Origin);
         RaiseLocalEvent(ent, ref before);
 
         if (before.Cancelled)
             return damageDone;
 
+        var damage = attack.Damages;
+
         // Apply resistances
-        if (!ignoreResistances)
+        if (!attack.IgnoreResistances)
         {
             if (
                 ent.Comp.DamageModifierSetId != null &&
@@ -150,7 +140,7 @@ public sealed partial class DamageableSystem
 
             // TODO DAMAGE
             // byref struct event.
-            var ev = new DamageModifyEvent(damage, origin);
+            var ev = new DamageModifyEvent(damage, attack.Origin);
             RaiseLocalEvent(ent, ev);
             damage = ev.Damage;
 
@@ -158,7 +148,7 @@ public sealed partial class DamageableSystem
                 return damageDone;
         }
 
-        if (!ignoreGlobalModifiers)
+        if (!attack.IgnoreGlobalModifiers)
             damage = ApplyUniversalAllModifiers(damage);
 
 
@@ -180,7 +170,7 @@ public sealed partial class DamageableSystem
         }
 
         if (!damageDone.Empty)
-            OnEntityDamageChanged((ent, ent.Comp), damageDone, interruptsDoAfters, origin);
+            OnEntityDamageChanged((ent, ent.Comp), damageDone, attack.InterruptsDoAfters, attack.Origin);
 
         return damageDone;
     }
@@ -207,7 +197,7 @@ public sealed partial class DamageableSystem
 
         // Get our total damage, or heal if we're below a certain amount.
         if (!TryGetDamageGreaterThan((ent, ent.Comp), -amount, out var damage, group))
-            return ChangeDamage(ent, -damage, true, false, origin);
+            return ChangeDamage(ent, new Attack(-damage, true, false, origin));
 
         // make sure damageChange has the same damage types as damage
         damageChange.DamageDict.EnsureCapacity(damage.DamageDict.Count);
@@ -253,7 +243,7 @@ public sealed partial class DamageableSystem
             }
         }
 
-        return ChangeDamage(ent, damageChange, true, false, origin);
+        return ChangeDamage(ent, new Attack(damageChange, true, false, origin));
     }
 
     /// <summary>
@@ -278,7 +268,7 @@ public sealed partial class DamageableSystem
 
         // Get our total damage, or heal if we're below a certain amount.
         if (!TryGetDamageGreaterThan((ent, ent.Comp), -amount, out var damage, group))
-            return ChangeDamage(ent, -damage, true, false, origin);
+            return ChangeDamage(ent, new Attack(-damage, true, false, origin));
 
         // make sure damageChange has the same damage types as damageEntity
         damageChange.DamageDict.EnsureCapacity(damage.DamageDict.Count);
@@ -290,7 +280,7 @@ public sealed partial class DamageableSystem
             damageChange.DamageDict.Add(type, value / total * amount);
         }
 
-        return ChangeDamage(ent, damageChange, true, false, origin);
+        return ChangeDamage(ent, new Attack(damageChange, true, false, origin));
     }
 
     /// <summary>

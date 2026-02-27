@@ -26,6 +26,7 @@ using Robust.Shared.Containers;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using System.Linq;
+using Content.Shared.Damage;
 
 namespace Content.Server.Mech.Systems;
 
@@ -266,7 +267,7 @@ public sealed partial class MechSystem : SharedMechSystem
             component.PilotSlot.ContainedEntity != null)
         {
             var damage = args.DamageDelta * component.MechToPilotDamageMultiplier;
-            _damageable.ChangeDamage(component.PilotSlot.ContainedEntity.Value, damage);
+            _damageable.ChangeDamage(component.PilotSlot.ContainedEntity.Value, new Attack(damage));
         }
     }
 

@@ -50,7 +50,7 @@ public sealed class DamageOnHighSpeedImpactSystem : EntitySystem
 
         var damageScale = component.SpeedDamageFactor * speed / component.MinimumSpeed;
 
-        _damageable.TryChangeDamage(uid, component.Damage * damageScale);
+        _damageable.TryChangeDamage(uid, new Attack(component.Damage * damageScale));
 
         if (_gameTiming.IsFirstTimePredicted)
             _audio.PlayPvs(component.SoundHit, uid, AudioParams.Default.WithVariation(0.125f).WithVolume(-0.125f));

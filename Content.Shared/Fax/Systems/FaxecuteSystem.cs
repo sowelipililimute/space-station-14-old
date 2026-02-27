@@ -1,3 +1,4 @@
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Fax.Components;
@@ -26,7 +27,7 @@ public sealed class FaxecuteSystem : EntitySystem
             return;
 
         var damageSpec = faxecute.Damage;
-        _damageable.ChangeDamage(sendEntity.Value, damageSpec);
+        _damageable.ChangeDamage(sendEntity.Value, new Attack(damageSpec));
         _popupSystem.PopupEntity(Loc.GetString("fax-machine-popup-error", ("target", uid)), uid, PopupType.LargeCaution);
         return;
 

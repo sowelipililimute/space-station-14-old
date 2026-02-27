@@ -1,4 +1,5 @@
 using Content.Shared.Construction.EntitySystems;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Destructible;
 using Content.Shared.Hands.Components;
@@ -66,7 +67,7 @@ public sealed class SecretStashSystem : EntitySystem
         // TODO: When newmed is finished should do damage to teeth (Or something like that!)
         var damage = entity.Comp.DamageEatenItemInside;
         if (HasItemInside(entity) && damage != null)
-            _damageableSystem.TryChangeDamage(args.User, damage, true);
+            _damageableSystem.TryChangeDamage(args.User, new Attack(damage, true));
     }
 
     private void OnInteractUsing(Entity<SecretStashComponent> entity, ref InteractUsingEvent args)

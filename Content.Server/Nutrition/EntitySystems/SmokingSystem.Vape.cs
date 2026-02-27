@@ -4,6 +4,7 @@ using Content.Server.Nutrition.Components;
 using Content.Server.Popups;
 using Content.Shared.Body.Components;
 using Content.Shared.Atmos;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.Emag.Systems;
@@ -131,7 +132,7 @@ namespace Content.Server.Nutrition.EntitySystems
             }
 
             //Smoking kills(your lungs, but there is no organ damage yet)
-            _damageableSystem.TryChangeDamage(args.Args.Target.Value, entity.Comp.Damage, true);
+            _damageableSystem.TryChangeDamage(args.Args.Target.Value, new Attack(entity.Comp.Damage, true));
 
             var merger = new GasMixture(1) { Temperature = args.Solution.Temperature };
             merger.SetMoles(entity.Comp.GasType, args.Solution.Volume.Value / entity.Comp.ReductionFactor);

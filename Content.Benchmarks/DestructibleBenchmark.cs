@@ -53,7 +53,7 @@ public class DestructibleBenchmark
 
     private TestMapData _currentMapData = default!;
 
-    private DamageSpecifier _damage;
+    private Attack _attack;
 
     private TestPair _pair = default!;
     private IEntityManager _entMan = default!;
@@ -83,7 +83,7 @@ public class DestructibleBenchmark
         if (!_protoMan.Resolve(DamageType, out var type))
             return;
 
-        _damage = new DamageSpecifier(type, DamageAmount);
+        _attack = new Attack(new DamageSpecifier(type, DamageAmount));
 
         _random.SetSeed(69420); // Randomness needs to be deterministic for benchmarking.
     }
@@ -139,7 +139,7 @@ public class DestructibleBenchmark
     {
         await _pair.Server.WaitPost(() =>
         {
-            _damageable.ApplyDamageToAllEntities(_damageables, _damage);
+            _damageable.ApplyDamageToAllEntities(_damageables, _attack);
         });
     }
 

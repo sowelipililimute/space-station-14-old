@@ -45,7 +45,7 @@ public sealed class PassiveDamageSystem : EntitySystem
             foreach (var allowedState in comp.AllowedStates)
             {
                 if(allowedState == mobState.CurrentState)
-                    _damageable.ChangeDamage((uid, damage), comp.Damage, true, false);
+                    _damageable.ChangeDamage((uid, damage), new Attack(comp.Damage, true, false));
             }
         }
     }

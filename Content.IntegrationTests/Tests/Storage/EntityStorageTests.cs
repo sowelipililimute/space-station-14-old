@@ -58,7 +58,7 @@ public sealed class EntityStorageTests
         // Damage the box
         var damage = new DamageSpecifier();
         damage.DamageDict.Add("Blunt", 100);
-        await server.WaitPost(() => server.System<DamageableSystem>().TryChangeDamage(box, damage));
+        await server.WaitPost(() => server.System<DamageableSystem>().TryChangeDamage(box, new Attack(damage)));
 
         // Box has been destroyed, contents have been emptied. Destruction uses deffered deletion.
         Assert.That(server.EntMan.IsQueuedForDeletion(box));

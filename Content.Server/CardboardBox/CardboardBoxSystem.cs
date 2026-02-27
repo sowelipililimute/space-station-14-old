@@ -2,6 +2,7 @@ using Content.Server.Storage.EntitySystems;
 using Content.Shared.Access.Components;
 using Content.Shared.CardboardBox;
 using Content.Shared.CardboardBox.Components;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
@@ -108,7 +109,7 @@ public sealed class CardboardBoxSystem : SharedCardboardBoxSystem
         if (args.DamageDelta == null || !args.DamageIncreased || component.Mover is not { } mover)
             return;
 
-        _damageable.ChangeDamage(mover, args.DamageDelta, origin: args.Origin);
+        _damageable.ChangeDamage(mover, new Attack(args.DamageDelta, Origin: args.Origin));
     }
 
     private void OnEntInserted(EntityUid uid, CardboardBoxComponent component, EntInsertedIntoContainerMessage args)

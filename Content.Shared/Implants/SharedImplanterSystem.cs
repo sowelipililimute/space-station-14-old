@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.DoAfter;
 using Content.Shared.Examine;
@@ -287,7 +288,7 @@ public abstract class SharedImplanterSystem : EntitySystem
 
     private void DrawCatastrophicFailure(EntityUid implanter, ImplanterComponent component, EntityUid user)
     {
-        _damageableSystem.TryChangeDamage(user, component.DeimplantFailureDamage, ignoreResistances: true, origin: implanter);
+        _damageableSystem.TryChangeDamage(user, new Attack(component.DeimplantFailureDamage, IgnoreResistances: true, Origin: implanter));
         var userName = Identity.Entity(user, EntityManager);
         var failedCatastrophicallyMessage = Loc.GetString("implanter-draw-failed-catastrophically", ("user", userName));
         _popup.PopupEntity(failedCatastrophicallyMessage, user, PopupType.MediumCaution);

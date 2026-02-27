@@ -1,4 +1,5 @@
 using Content.Shared.Administration.Logs;
+using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
 using Content.Shared.Destructible;
@@ -101,7 +102,7 @@ public sealed class SharedKitchenSpikeSystem : EntitySystem
             return;
 
         EnsureComp<KitchenSpikeHookedComponent>(args.Entity);
-        _damageableSystem.TryChangeDamage(args.Entity, ent.Comp.SpikeDamage, true);
+        _damageableSystem.TryChangeDamage(args.Entity, new Attack(ent.Comp.SpikeDamage, true));
 
         ent.Comp.NextDamage = _gameTiming.CurTime + ent.Comp.DamageInterval;
         Dirty(ent);
@@ -116,7 +117,7 @@ public sealed class SharedKitchenSpikeSystem : EntitySystem
             return;
 
         RemComp<KitchenSpikeHookedComponent>(args.Entity);
-        _damageableSystem.TryChangeDamage(args.Entity, ent.Comp.SpikeDamage, true);
+        _damageableSystem.TryChangeDamage(args.Entity, new Attack(ent.Comp.SpikeDamage, true));
 
         _appearanceSystem.SetData(ent.Owner, KitchenSpikeVisuals.Status, KitchenSpikeStatus.Empty);
     }
@@ -326,7 +327,7 @@ public sealed class SharedKitchenSpikeSystem : EntitySystem
         {
             EnsureComp<KitchenSpikeVictimComponent>(args.Target.Value);
 
-            _damageableSystem.ChangeDamage(args.Target.Value, ent.Comp.ButcherDamage, true);
+            _damageableSystem.ChangeDamage(args.Target.Value, new Attack(ent.Comp.ButcherDamage, true));
 
             // Log severity for damaging other entities is normally medium.
             _logger.Add(LogType.Action,
@@ -424,7 +425,7 @@ public sealed class SharedKitchenSpikeSystem : EntitySystem
             kitchenSpike.NextDamage += kitchenSpike.DamageInterval;
             Dirty(uid, kitchenSpike);
 
-            _damageableSystem.ChangeDamage(contained.Value, kitchenSpike.TimeDamage, true);
+            _damageableSystem.ChangeDamage(contained.Value, new Attack(kitchenSpike.TimeDamage, true));
         }
     }
 

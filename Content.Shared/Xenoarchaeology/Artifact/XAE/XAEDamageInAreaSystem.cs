@@ -38,7 +38,7 @@ public sealed class XAEDamageInAreaSystem : BaseXAESystem<XAEDamageInAreaCompone
             if (_whitelistSystem.IsWhitelistFail(damageInAreaComponent.Whitelist, entityInRange))
                 continue;
 
-            _damageable.TryChangeDamage(entityInRange, damageInAreaComponent.Damage, damageInAreaComponent.IgnoreResistances);
+            _damageable.TryChangeDamage(entityInRange, new Attack(damageInAreaComponent.Damage, damageInAreaComponent.IgnoreResistances));
         }
     }
 }

@@ -58,7 +58,7 @@ public sealed class ProjectileSystem : SharedProjectileSystem
         }
         var deleted = Deleted(target);
 
-        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter) && Exists(component.Shooter))
+        if (_damageableSystem.TryChangeDamage((target, damageableComponent), new Attack(ev.Damage, component.IgnoreResistances, Origin: component.Shooter), out var damage) && Exists(component.Shooter))
         {
             if (!deleted)
             {

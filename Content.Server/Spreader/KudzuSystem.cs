@@ -1,3 +1,4 @@
+using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Spreader;
@@ -123,7 +124,7 @@ public sealed class KudzuSystem : EntitySystem
                     if (kudzu.DamageRecovery != null)
                     {
                         // This kudzu features healing, so Gradually heal
-                        _damageable.TryChangeDamage(uid, kudzu.DamageRecovery, true);
+                        _damageable.TryChangeDamage(uid, new Attack(kudzu.DamageRecovery, true));
                     }
                     if (damage.TotalDamage >= kudzu.GrowthBlock)
                     {

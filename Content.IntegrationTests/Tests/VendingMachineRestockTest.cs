@@ -306,7 +306,7 @@ namespace Content.IntegrationTests.Tests
 
                 restock = entityManager.SpawnEntity("TestRestockExplode", coordinates);
                 var damageSpec = new DamageSpecifier(prototypeManager.Index(TestDamageType), 100);
-                var damageResult = damageableSystem.ChangeDamage(restock, damageSpec);
+                var damageResult = damageableSystem.ChangeDamage(restock, new Attack(damageSpec));
 
 #pragma warning disable NUnit2045
                 Assert.That(!damageResult.Empty, "Received empty damageResult when attempting to damage restock box.");
