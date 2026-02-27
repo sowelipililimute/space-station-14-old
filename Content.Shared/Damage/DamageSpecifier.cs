@@ -1,12 +1,10 @@
 using System.Linq;
 using System.Text.Json.Serialization;
-using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
+using Content.Shared.Maths;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Utility;
 using Robust.Shared.Serialization;
-using Robust.Shared.Serialization.TypeSerializers.Implementations.Generic;
 
 namespace Content.Shared.Damage
 {
@@ -50,13 +48,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public bool AnyPositive()
         {
-            foreach (var value in DamageDict.Values)
-            {
-                if (value > FixedPoint2.Zero)
-                    return true;
-            }
-
-            return false;
+            return DamageDict.AnyPositive();
         }
 
         /// <summary>
@@ -80,6 +72,11 @@ namespace Content.Shared.Damage
         ///     Constructor that just results in an empty dictionary.
         /// </summary>
         public DamageSpecifier() { }
+
+        public DamageSpecifier(Dictionary<ProtoId<DamageTypePrototype>, FixedPoint2> damage)
+        {
+            DamageDict = damage;
+        }
 
         /// <summary>
         ///     Constructor that takes another DamageSpecifier instance and copies it.
@@ -186,15 +183,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public static DamageSpecifier GetPositive(DamageSpecifier damageSpec)
         {
-            DamageSpecifier newDamage = new();
-
-            foreach (var (key, value) in damageSpec.DamageDict)
-            {
-                if (value > 0)
-                    newDamage.DamageDict[key] = value;
-            }
-
-            return newDamage;
+            return new(damageSpec.DamageDict.GetPositive());
         }
 
         /// <summary>
@@ -202,15 +191,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public static DamageSpecifier GetNegative(DamageSpecifier damageSpec)
         {
-            DamageSpecifier newDamage = new();
-
-            foreach (var (key, value) in damageSpec.DamageDict)
-            {
-                if (value < 0)
-                    newDamage.DamageDict[key] = value;
-            }
-
-            return newDamage;
+            return new(damageSpec.DamageDict.GetNegative());
         }
 
         /// <summary>
@@ -218,13 +199,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public void TrimZeros()
         {
-            foreach (var (key, value) in DamageDict)
-            {
-                if (value == 0)
-                {
-                    DamageDict.Remove(key);
-                }
-            }
+            DamageDict.TrimZeros();
         }
 
         /// <summary>
@@ -232,9 +207,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public void Clamp(FixedPoint2 minValue, FixedPoint2 maxValue)
         {
-            DebugTools.Assert(minValue < maxValue);
-            ClampMax(maxValue);
-            ClampMin(minValue);
+            DamageDict.Clamp(minValue, maxValue);
         }
 
         /// <summary>
@@ -245,13 +218,7 @@ namespace Content.Shared.Damage
         /// </remarks>
         public void ClampMin(FixedPoint2 minValue)
         {
-            foreach (var (key, value) in DamageDict)
-            {
-                if (value < minValue)
-                {
-                    DamageDict[key] = minValue;
-                }
-            }
+            DamageDict.ClampMin(minValue);
         }
 
         /// <summary>
@@ -260,33 +227,7 @@ namespace Content.Shared.Damage
         /// </summary>
         public void ClampMax(FixedPoint2 maxValue)
         {
-            foreach (var (key, value) in DamageDict)
-            {
-                if (value > maxValue)
-                {
-                    DamageDict[key] = maxValue;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     This adds the damage values of some other <see cref="DamageSpecifier"/> to the current one without
-        ///     adding any new damage types.
-        /// </summary>
-        /// <remarks>
-        ///     This is used for <see cref="DamageableComponent"/>s, such that only "supported" damage types are
-        ///     actually added to the component. In most other instances, you can just use the addition operator.
-        /// </remarks>
-        public void ExclusiveAdd(DamageSpecifier other)
-        {
-            foreach (var (type, value) in other.DamageDict)
-            {
-                // CollectionsMarshal my beloved.
-                if (DamageDict.TryGetValue(type, out var existing))
-                {
-                    DamageDict[type] = existing + value;
-                }
-            }
+            DamageDict.ClampMax(maxValue);
         }
 
         /// <summary>
@@ -341,76 +282,32 @@ namespace Content.Shared.Damage
         #region Operators
         public static DamageSpecifier operator *(DamageSpecifier damageSpec, FixedPoint2 factor)
         {
-            DamageSpecifier newDamage = new();
-            foreach (var entry in damageSpec.DamageDict)
-            {
-                newDamage.DamageDict.Add(entry.Key, entry.Value * factor);
-            }
-            return newDamage;
+            return new(damageSpec.DamageDict * factor);
         }
 
         public static DamageSpecifier operator *(DamageSpecifier damageSpec, float factor)
         {
-            DamageSpecifier newDamage = new();
-            foreach (var entry in damageSpec.DamageDict)
-            {
-                newDamage.DamageDict.Add(entry.Key, entry.Value * factor);
-            }
-            return newDamage;
+            return new(damageSpec.DamageDict * factor);
         }
 
         public static DamageSpecifier operator /(DamageSpecifier damageSpec, FixedPoint2 factor)
         {
-            DamageSpecifier newDamage = new();
-            foreach (var entry in damageSpec.DamageDict)
-            {
-                newDamage.DamageDict.Add(entry.Key, entry.Value / factor);
-            }
-            return newDamage;
+            return new(damageSpec.DamageDict / factor);
         }
 
         public static DamageSpecifier operator /(DamageSpecifier damageSpec, float factor)
         {
-            DamageSpecifier newDamage = new();
-
-            foreach (var entry in damageSpec.DamageDict)
-            {
-                newDamage.DamageDict.Add(entry.Key, entry.Value / factor);
-            }
-            return newDamage;
+            return new(damageSpec.DamageDict / factor);
         }
 
         public static DamageSpecifier operator +(DamageSpecifier damageSpecA, DamageSpecifier damageSpecB)
         {
-            // Copy existing dictionary from dataA
-            DamageSpecifier newDamage = new(damageSpecA);
-
-            // Then just add types in B
-            foreach (var entry in damageSpecB.DamageDict)
-            {
-                if (!newDamage.DamageDict.TryAdd(entry.Key, entry.Value))
-                {
-                    // Key already exists, add values
-                    newDamage.DamageDict[entry.Key] += entry.Value;
-                }
-            }
-            return newDamage;
+            return new(damageSpecA.DamageDict + damageSpecB.DamageDict);
         }
 
-        // Here we define the subtraction operator explicitly, rather than implicitly via something like X + (-1 * Y).
-        // This is faster because FixedPoint2 multiplication is somewhat involved.
         public static DamageSpecifier operator -(DamageSpecifier damageSpecA, DamageSpecifier damageSpecB)
         {
-            DamageSpecifier newDamage = new(damageSpecA);
-
-            foreach (var entry in damageSpecB.DamageDict)
-            {
-                if (!newDamage.DamageDict.TryAdd(entry.Key, -entry.Value))
-                {
-                    newDamage.DamageDict[entry.Key] -= entry.Value;
-                }
-            }
-            return newDamage;
+            return new(damageSpecA.DamageDict - damageSpecB.DamageDict);
         }
 
         public static DamageSpecifier operator +(DamageSpecifier damageSpec) => damageSpec;

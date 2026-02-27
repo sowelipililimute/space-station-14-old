@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
 
@@ -10,7 +11,14 @@ namespace Content.Shared.FixedPoint
     ///     To enforce this level of precision, floats are shifted by 2 decimal points, rounded, and converted to an int.
     /// </summary>
     [Serializable, CopyByRef]
-    public struct FixedPoint2 : ISelfSerialize, IComparable<FixedPoint2>, IEquatable<FixedPoint2>, IFormattable
+    public struct FixedPoint2 : ISelfSerialize, IComparable<FixedPoint2>, IEquatable<FixedPoint2>, IFormattable,
+        IComparisonOperators<FixedPoint2, FixedPoint2, bool>,
+        IAdditiveIdentity<FixedPoint2, FixedPoint2>,
+        IAdditionOperators<FixedPoint2, FixedPoint2, FixedPoint2>,
+        ISubtractionOperators<FixedPoint2, FixedPoint2, FixedPoint2>,
+        IMultiplyOperators<FixedPoint2, FixedPoint2, FixedPoint2>,
+        IDivisionOperators<FixedPoint2, FixedPoint2, FixedPoint2>,
+        IUnaryNegationOperators<FixedPoint2, FixedPoint2>
     {
         public int Value { get; private set; }
         private const int Shift = 2;
@@ -19,6 +27,8 @@ namespace Content.Shared.FixedPoint
         public static FixedPoint2 MaxValue { get; } = new(int.MaxValue);
         public static FixedPoint2 Epsilon { get; } = new(1);
         public static FixedPoint2 Zero { get; } = new(0);
+
+        public static FixedPoint2 AdditiveIdentity => Zero;
 
         // This value isn't picked by any proper testing, don't @ me.
         private const float FloatEpsilon = 0.00001f;
