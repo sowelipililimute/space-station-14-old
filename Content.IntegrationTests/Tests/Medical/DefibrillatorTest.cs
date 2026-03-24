@@ -41,7 +41,7 @@ public sealed class DefibrillatorTest : InteractionTest
         await SpawnTarget(TargetProtoId);
 
         var targetMobState = Comp<MobStateComponent>();
-        var targetDamageable = Comp<DamageableComponent>();
+        var targetInjurable = Comp<InjurableComponent>();
 
         // Check that the target has no damage and is not crit or dead.
         Assert.Multiple(() =>
@@ -57,7 +57,7 @@ public sealed class DefibrillatorTest : InteractionTest
         var deathDamage = new DamageSpecifier(ProtoMan.Index(BluntDamageTypeId), deathThreshold);
 
         // Kill the target by applying blunt damage.
-        await Server.WaitPost(() => damageableSystem.SetDamage((STarget.Value, targetDamageable), deathDamage));
+        await Server.WaitPost(() => damageableSystem.SetDamage((STarget.Value, targetInjurable), deathDamage));
         await RunTicks(3);
 
         // Check that the target is dead.
@@ -86,7 +86,7 @@ public sealed class DefibrillatorTest : InteractionTest
         });
 
         // Set the damage halfway between the crit and death thresholds so that the target can be revived.
-        await Server.WaitPost(() => damageableSystem.SetDamage((STarget.Value, targetDamageable), critDamage));
+        await Server.WaitPost(() => damageableSystem.SetDamage((STarget.Value, targetInjurable), critDamage));
         await RunTicks(3);
 
         // Check that the target is still dead.

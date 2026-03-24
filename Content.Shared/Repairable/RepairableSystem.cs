@@ -13,7 +13,7 @@ namespace Content.Shared.Repairable;
 public sealed partial class RepairableSystem : EntitySystem
 {
     [Dependency] private readonly SharedToolSystem _toolSystem = default!;
-    [Dependency] private readonly DamageableSystem _damageableSystem = default!;
+    [Dependency] private readonly InjurableSystem _injurable = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly ISharedAdminLogManager _adminLogger = default!;
 
@@ -28,10 +28,10 @@ public sealed partial class RepairableSystem : EntitySystem
         if (args.Cancelled)
             return;
 
-        if (!TryComp(ent.Owner, out DamageableComponent? damageable))
+        if (!TryComp(ent.Owner, out InjurableComponent? damageable))
             return;
 
-        var totalDamage = _damageableSystem.GetTotalDamage((ent.Owner, damageable));
+        var totalDamage = _injurable.GetTotalInjuries((ent.Owner, damageable));
         if (totalDamage == 0)
             return;
 
@@ -66,9 +66,9 @@ public sealed partial class RepairableSystem : EntitySystem
     /// <param name="ent">entity to be repaired</param>
     /// <param name="damageAmount">how much damage to repair (value have to be negative to repair)</param>
     /// <param name="user">who is doing the repair</param>
-    private void RepairSomeDamage(Entity<DamageableComponent?> ent, float damageAmount, EntityUid user)
+    private void RepairSomeDamage(Entity<InjurableComponent?> ent, float damageAmount, EntityUid user)
     {
-        var damageChanged = _damageableSystem.HealEvenly(ent.Owner, damageAmount, origin: user);
+        var damageChanged = _injurable.HealEvenly(ent.Owner, damageAmount, null, origin: user);
         _adminLogger.Add(LogType.Healed, $"{ToPrettyString(user):user} repaired {ToPrettyString(ent.Owner):target} by {damageChanged.GetTotal()}");
     }
 
@@ -78,9 +78,9 @@ public sealed partial class RepairableSystem : EntitySystem
     /// <param name="ent">entity to be repaired</param>
     /// <param name="damageAmount">how much damage to repair (values have to be negative to repair)</param>
     /// <param name="user">who is doing the repair</param>
-    private void RepairSomeDamage(Entity<DamageableComponent?> ent, Damage.DamageSpecifier damageAmount, EntityUid user)
+    private void RepairSomeDamage(Entity<InjurableComponent?> ent, Damage.DamageSpecifier damageAmount, EntityUid user)
     {
-        var damageChanged = _damageableSystem.ChangeDamage(ent.Owner, damageAmount, true, false, origin: user);
+        var damageChanged = _injurable.ChangeInjuries(ent.Owner, damageAmount, origin: user);
         _adminLogger.Add(LogType.Healed, $"{ToPrettyString(user):user} repaired {ToPrettyString(ent.Owner):target} by {damageChanged.GetTotal()}");
     }
 
@@ -89,9 +89,9 @@ public sealed partial class RepairableSystem : EntitySystem
     /// </summary>
     /// <param name="ent">entity to be repaired</param>
     /// <param name="user">who is doing the repair</param>
-    private void RepairAllDamage(Entity<DamageableComponent?> ent, EntityUid user)
+    private void RepairAllDamage(Entity<InjurableComponent?> ent, EntityUid user)
     {
-        _damageableSystem.ClearAllDamage(ent);
+        _injurable.ClearAllInjuries(ent);
         _adminLogger.Add(LogType.Healed, $"{ToPrettyString(user):user} repaired {ToPrettyString(ent.Owner):target} back to full health");
     }
 
@@ -101,7 +101,7 @@ public sealed partial class RepairableSystem : EntitySystem
             return;
 
         // Only try repair the target if it is damaged
-        if (_damageableSystem.GetTotalDamage(ent.Owner) == 0)
+        if (_injurable.GetTotalInjuries(ent.Owner) == 0)
             return;
 
         float delay = ent.Comp.DoAfterDelay;

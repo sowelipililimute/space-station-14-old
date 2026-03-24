@@ -3,7 +3,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared.Damage.Prototypes
 {
     /// <summary>
-    ///     A single damage type. These types are grouped together in <see cref="DamageGroupPrototype"/>s.
+    ///     A single damage type.
     /// </summary>
     [Prototype]
     public sealed partial class DamageTypePrototype : IPrototype

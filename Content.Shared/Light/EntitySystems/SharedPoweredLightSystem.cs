@@ -52,7 +52,7 @@ public abstract class SharedPoweredLightSystem : EntitySystem
         SubscribeLocalEvent<PoweredLightComponent, DeviceNetworkPacketEvent>(OnPacketReceived);
         SubscribeLocalEvent<PoweredLightComponent, PowerChangedEvent>(OnPowerChanged);
         SubscribeLocalEvent<PoweredLightComponent, PoweredLightDoAfterEvent>(OnDoAfter);
-        SubscribeLocalEvent<PoweredLightComponent, DamageChangedEvent>(HandleLightDamaged);
+        SubscribeLocalEvent<PoweredLightComponent, DamageDealtEvent>(HandleLightDamaged);
         SubscribeLocalEvent<PoweredLightComponent, EmpPulseEvent>(OnEmpPulse);
     }
 
@@ -324,7 +324,7 @@ public abstract class SharedPoweredLightSystem : EntitySystem
     /// <remarks>
     ///     TODO: This should be an IThresholdBehaviour once DestructibleSystem is predicted.
     /// </remarks>
-    public void HandleLightDamaged(EntityUid uid, PoweredLightComponent component, DamageChangedEvent args)
+    public void HandleLightDamaged(EntityUid uid, PoweredLightComponent component, ref DamageDealtEvent args)
     {
         if (GameTiming.ApplyingState) // The destruction is already networked on its own.
             return;

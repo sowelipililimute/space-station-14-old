@@ -49,7 +49,7 @@ public class DestructibleBenchmark
     private readonly EntProtoId[] _prototypes = [WindowProtoId, WallProtoId, HumanProtoId];
 
     private readonly List<Entity<DamageableComponent>> _damageables = new();
-    private readonly List<Entity<DamageableComponent, DestructibleComponent>> _destructbiles = new();
+    private readonly List<Entity<InjurableComponent, DestructibleComponent>> _destructbiles = new();
 
     private TestMapData _currentMapData = default!;
 
@@ -119,15 +119,15 @@ public class DestructibleBenchmark
                 }
             }
 
-            var query = _entMan.EntityQueryEnumerator<DamageableComponent, DestructibleComponent>();
+            var query = _entMan.EntityQueryEnumerator<DamageableComponent, InjurableComponent, DestructibleComponent>();
 
             _destructbiles.EnsureCapacity(EntityCount);
             _damageables.EnsureCapacity(EntityCount);
 
-            while (query.MoveNext(out var uid, out var damageable, out var destructible))
+            while (query.MoveNext(out var uid, out var damageable, out var injurable, out var destructible))
             {
                 _damageables.Add((uid, damageable));
-                _destructbiles.Add((uid, damageable, destructible));
+                _destructbiles.Add((uid, injurable, destructible));
             }
         })
         .GetAwaiter()

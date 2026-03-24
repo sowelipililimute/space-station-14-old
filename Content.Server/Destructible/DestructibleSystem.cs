@@ -10,6 +10,7 @@ using Content.Server.Fluids.EntitySystems;
 using Content.Server.Stack;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Database;
 using Content.Shared.Destructible;
@@ -48,19 +49,19 @@ namespace Content.Server.Destructible
         public override void Initialize()
         {
             base.Initialize();
-            SubscribeLocalEvent<DestructibleComponent, DamageChangedEvent>(OnDamageChanged);
+            SubscribeLocalEvent<DestructibleComponent, InjuriesChangedEvent>(OnInjuriesChanged);
         }
 
         /// <summary>
         /// Check if any thresholds were reached. if they were, execute them.
         /// </summary>
-        private void OnDamageChanged(EntityUid uid, DestructibleComponent component, DamageChangedEvent args)
+        private void OnInjuriesChanged(EntityUid uid, DestructibleComponent component, InjuriesChangedEvent args)
         {
             component.IsBroken = false;
 
             foreach (var threshold in component.Thresholds)
             {
-                if (Triggered(threshold, (uid, args.Damageable)))
+                if (Triggered(threshold, args.Injurable))
                 {
                     RaiseLocalEvent(uid, new DamageThresholdReached(component, threshold), true);
 
@@ -112,7 +113,7 @@ namespace Content.Server.Destructible
         /// <summary>
         /// Check if the given threshold should trigger.
         /// </summary>
-        public bool Triggered(DamageThreshold threshold, Entity<Shared.Damage.Components.DamageableComponent> owner)
+        public bool Triggered(DamageThreshold threshold, Entity<InjurableComponent> owner)
         {
             if (threshold.Trigger == null)
                 return false;
@@ -136,7 +137,7 @@ namespace Content.Server.Destructible
         /// <summary>
         /// Check if the conditions for the given threshold are currently true.
         /// </summary>
-        public bool Reached(DamageThreshold threshold, Entity<Shared.Damage.Components.DamageableComponent> owner)
+        public bool Reached(DamageThreshold threshold, Entity<InjurableComponent> owner)
         {
             if (threshold.Trigger == null)
                 return false;

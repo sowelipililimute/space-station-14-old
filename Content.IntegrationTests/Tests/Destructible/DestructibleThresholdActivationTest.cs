@@ -35,7 +35,7 @@ namespace Content.IntegrationTests.Tests.Destructible
             var testMap = await pair.CreateTestMap();
 
             EntityUid sDestructibleEntity = default;
-            DamageableComponent sDamageableComponent = null;
+            InjurableComponent sInjurableComponent = null;
             DestructibleComponent sDestructibleComponent = null;
             TestDestructibleListenerSystem sTestThresholdListenerSystem = null;
             DamageableSystem sDamageableSystem = null;
@@ -45,7 +45,7 @@ namespace Content.IntegrationTests.Tests.Destructible
                 var coordinates = testMap.GridCoords;
 
                 sDestructibleEntity = sEntityManager.SpawnEntity(DestructibleEntityId, coordinates);
-                sDamageableComponent = sEntityManager.GetComponent<DamageableComponent>(sDestructibleEntity);
+                sInjurableComponent = sEntityManager.GetComponent<InjurableComponent>(sDestructibleEntity);
                 sDestructibleComponent = sEntityManager.GetComponent<DestructibleComponent>(sDestructibleEntity);
 
                 sTestThresholdListenerSystem = sEntitySystemManager.GetEntitySystem<TestDestructibleListenerSystem>();
@@ -126,7 +126,7 @@ namespace Content.IntegrationTests.Tests.Destructible
                 Assert.That(sTestThresholdListenerSystem.ThresholdsReached, Is.Empty);
 
                 // Set damage to 0
-                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sDamageableComponent));
+                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sInjurableComponent));
 
                 // Damage for 100, up to 100
                 sDamageableSystem.TryChangeDamage(sDestructibleEntity, bluntDamage * 10, true);
@@ -187,7 +187,7 @@ namespace Content.IntegrationTests.Tests.Destructible
                 sTestThresholdListenerSystem.ThresholdsReached.Clear();
 
                 // Heal all damage
-                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sDamageableComponent));
+                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sInjurableComponent));
 
                 // Damage up to 50
                 sDamageableSystem.TryChangeDamage(sDestructibleEntity, bluntDamage * 5, true);
@@ -249,7 +249,7 @@ namespace Content.IntegrationTests.Tests.Destructible
                 sTestThresholdListenerSystem.ThresholdsReached.Clear();
 
                 // Heal the entity completely
-                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sDamageableComponent));
+                sDamageableSystem.ClearAllDamage((sDestructibleEntity, sInjurableComponent));
 
                 // Check that the entity has 0 damage
                 Assert.That(sDamageableSystem.GetTotalDamage(sDestructibleEntity), Is.EqualTo(FixedPoint2.Zero));

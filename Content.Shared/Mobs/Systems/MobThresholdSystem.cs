@@ -24,7 +24,7 @@ public sealed class MobThresholdSystem : EntitySystem
 
         SubscribeLocalEvent<MobThresholdsComponent, ComponentShutdown>(MobThresholdShutdown);
         SubscribeLocalEvent<MobThresholdsComponent, ComponentStartup>(MobThresholdStartup);
-        SubscribeLocalEvent<MobThresholdsComponent, DamageChangedEvent>(OnDamaged);
+        SubscribeLocalEvent<MobThresholdsComponent, InjuriesChangedEvent>(OnDamaged);
         SubscribeLocalEvent<MobThresholdsComponent, UpdateMobStateEvent>(OnUpdateMobState);
         SubscribeLocalEvent<MobThresholdsComponent, MobStateChangedEvent>(OnThresholdsMobState);
     }
@@ -249,33 +249,6 @@ public sealed class MobThresholdSystem : EntitySystem
     }
 
     /// <summary>
-    /// Takes the damage from one entity and scales it relative to the health of another
-    /// </summary>
-    /// <param name="target1">The entity whose damage will be scaled</param>
-    /// <param name="target2">The entity whose health the damage will scale to</param>
-    /// <param name="damage">The newly scaled damage. Can be null</param>
-    public bool GetScaledDamage(EntityUid target1, EntityUid target2, out DamageSpecifier? damage)
-    {
-        damage = null;
-
-        if (!TryComp<DamageableComponent>(target1, out var oldDamage))
-            return false;
-
-        if (!TryComp<MobThresholdsComponent>(target1, out var threshold1) ||
-            !TryComp<MobThresholdsComponent>(target2, out var threshold2))
-            return false;
-
-        if (!TryGetThresholdForState(target1, MobState.Dead, out var ent1DeadThreshold, threshold1))
-            ent1DeadThreshold = 0;
-
-        if (!TryGetThresholdForState(target2, MobState.Dead, out var ent2DeadThreshold, threshold2))
-            ent2DeadThreshold = 0;
-
-        damage = (_damageable.GetAllDamage((target1, oldDamage)) / ent1DeadThreshold.Value) * ent2DeadThreshold.Value;
-        return true;
-    }
-
-    /// <summary>
     /// Set a MobState Threshold or create a new one if it doesn't exist
     /// </summary>
     /// <param name="target">Target Entity</param>
@@ -310,7 +283,7 @@ public sealed class MobThresholdSystem : EntitySystem
     /// <param name="mobState">MobState Component owned by the Target</param>
     /// <param name="damageable">Damageable Component owned by the Target</param>
     public void VerifyThresholds(EntityUid target, MobThresholdsComponent? threshold = null,
-        MobStateComponent? mobState = null, DamageableComponent? damageable = null)
+        MobStateComponent? mobState = null, InjurableComponent? damageable = null)
     {
         if (!Resolve(target, ref mobState, ref threshold, ref damageable))
             return;
@@ -336,7 +309,7 @@ public sealed class MobThresholdSystem : EntitySystem
     #region Private Implementation
 
     private void CheckThresholds(EntityUid target, MobStateComponent mobStateComponent,
-        MobThresholdsComponent thresholdsComponent, DamageableComponent damageableComponent, EntityUid? origin = null)
+        MobThresholdsComponent thresholdsComponent, InjurableComponent damageableComponent, EntityUid? origin = null)
     {
         foreach (var (threshold, mobState) in thresholdsComponent.Thresholds.Reverse())
         {
@@ -371,7 +344,7 @@ public sealed class MobThresholdSystem : EntitySystem
     }
 
     private void UpdateAlerts(EntityUid target, MobState currentMobState, MobThresholdsComponent? threshold = null,
-        DamageableComponent? damageable = null)
+        InjurableComponent? damageable = null)
     {
         if (!Resolve(target, ref threshold, ref damageable))
             return;
@@ -424,19 +397,19 @@ public sealed class MobThresholdSystem : EntitySystem
         }
     }
 
-    private void OnDamaged(EntityUid target, MobThresholdsComponent thresholds, DamageChangedEvent args)
+    private void OnDamaged(EntityUid target, MobThresholdsComponent thresholds, ref InjuriesChangedEvent args)
     {
         if (!TryComp<MobStateComponent>(target, out var mobState))
             return;
-        CheckThresholds(target, mobState, thresholds, args.Damageable, args.Origin);
-        var ev = new MobThresholdChecked(target, mobState, thresholds, args.Damageable);
+        CheckThresholds(target, mobState, thresholds, args.Injurable, args.Origin);
+        var ev = new MobThresholdChecked(target, mobState, thresholds, args.Injurable);
         RaiseLocalEvent(target, ref ev, true);
-        UpdateAlerts(target, mobState.CurrentState, thresholds, args.Damageable);
+        UpdateAlerts(target, mobState.CurrentState, thresholds, args.Injurable);
     }
 
     private void MobThresholdStartup(EntityUid target, MobThresholdsComponent thresholds, ComponentStartup args)
     {
-        if (!TryComp<MobStateComponent>(target, out var mobState) || !TryComp<DamageableComponent>(target, out var damageable))
+        if (!TryComp<MobStateComponent>(target, out var mobState) || !TryComp<InjurableComponent>(target, out var damageable))
             return;
         CheckThresholds(target, mobState, thresholds, damageable);
         UpdateAllEffects((target, thresholds, mobState, damageable), mobState.CurrentState);
@@ -460,7 +433,7 @@ public sealed class MobThresholdSystem : EntitySystem
         }
     }
 
-    private void UpdateAllEffects(Entity<MobThresholdsComponent, MobStateComponent?, DamageableComponent?> ent, MobState currentState)
+    private void UpdateAllEffects(Entity<MobThresholdsComponent, MobStateComponent?, InjurableComponent?> ent, MobState currentState)
     {
         var (_, thresholds, mobState, damageable) = ent;
         if (Resolve(ent, ref thresholds, ref mobState, ref damageable))
@@ -486,7 +459,7 @@ public sealed class MobThresholdSystem : EntitySystem
 /// <param name="Target">Target entity</param>
 /// <param name="Threshold">Threshold Component owned by the Target</param>
 /// <param name="MobState">MobState Component owned by the Target</param>
-/// <param name="Damageable">Damageable Component owned by the Target</param>
+/// <param name="Injurable">Injurable Component owned by the Target</param>
 [ByRefEvent]
 public readonly record struct MobThresholdChecked(EntityUid Target, MobStateComponent MobState,
-    MobThresholdsComponent Threshold, DamageableComponent Damageable);
+    MobThresholdsComponent Threshold, InjurableComponent Injurable);

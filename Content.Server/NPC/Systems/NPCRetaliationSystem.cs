@@ -21,11 +21,11 @@ public sealed class NPCRetaliationSystem : EntitySystem
     /// <inheritdoc />
     public override void Initialize()
     {
-        SubscribeLocalEvent<NPCRetaliationComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<NPCRetaliationComponent, DamageDealtEvent>(OnDamageDealt);
         SubscribeLocalEvent<NPCRetaliationComponent, DisarmedEvent>(OnDisarmed);
     }
 
-    private void OnDamageChanged(Entity<NPCRetaliationComponent> ent, ref DamageChangedEvent args)
+    private void OnDamageDealt(Entity<NPCRetaliationComponent> ent, ref DamageDealtEvent args)
     {
         if (!args.DamageIncreased)
             return;

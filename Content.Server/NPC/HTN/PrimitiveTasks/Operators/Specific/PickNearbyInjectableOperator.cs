@@ -20,7 +20,7 @@ public sealed partial class PickNearbyInjectableOperator : HTNOperator
     private PathfindingSystem _pathfinding = default!;
     private DamageableSystem _damageable = default!;
 
-    private EntityQuery<DamageableComponent> _damageQuery = default!;
+    private EntityQuery<InjurableComponent> _injuryQuery = default!;
     private EntityQuery<InjectableSolutionComponent> _injectQuery = default!;
     private EntityQuery<NPCRecentlyInjectedComponent> _recentlyInjected = default!;
     private EntityQuery<MobStateComponent> _mobState = default!;
@@ -47,7 +47,7 @@ public sealed partial class PickNearbyInjectableOperator : HTNOperator
         _pathfinding = sysManager.GetEntitySystem<PathfindingSystem>();
         _damageable = sysManager.GetEntitySystem<DamageableSystem>();
 
-        _damageQuery = _entManager.GetEntityQuery<DamageableComponent>();
+        _injuryQuery = _entManager.GetEntityQuery<InjurableComponent>();
         _injectQuery = _entManager.GetEntityQuery<InjectableSolutionComponent>();
         _recentlyInjected = _entManager.GetEntityQuery<NPCRecentlyInjectedComponent>();
         _mobState = _entManager.GetEntityQuery<MobStateComponent>();
@@ -73,7 +73,7 @@ public sealed partial class PickNearbyInjectableOperator : HTNOperator
         {
             if (_mobState.TryGetComponent(entity, out var state) &&
                 _injectQuery.HasComponent(entity) &&
-                _damageQuery.TryGetComponent(entity, out var damage) &&
+                _injuryQuery.TryGetComponent(entity, out var damage) &&
                 !_recentlyInjected.HasComponent(entity))
             {
                 // no treating dead bodies

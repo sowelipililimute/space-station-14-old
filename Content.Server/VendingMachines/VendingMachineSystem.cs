@@ -29,7 +29,7 @@ namespace Content.Server.VendingMachines
             base.Initialize();
 
             SubscribeLocalEvent<VendingMachineComponent, PowerChangedEvent>(OnPowerChanged);
-            SubscribeLocalEvent<VendingMachineComponent, DamageChangedEvent>(OnDamageChanged);
+            SubscribeLocalEvent<VendingMachineComponent, DamageDealtEvent>(OnDamageDealt);
             SubscribeLocalEvent<VendingMachineComponent, PriceCalculationEvent>(OnVendingPrice);
             SubscribeLocalEvent<VendingMachineComponent, TryVocalizeEvent>(OnTryVocalize);
 
@@ -71,21 +71,13 @@ namespace Content.Server.VendingMachines
             TryUpdateVisualState((uid, component));
         }
 
-        private void OnDamageChanged(EntityUid uid, VendingMachineComponent component, DamageChangedEvent args)
+        private void OnDamageDealt(EntityUid uid, VendingMachineComponent component, ref DamageDealtEvent args)
         {
-            if (!args.DamageIncreased && component.Broken)
-            {
-                component.Broken = false;
-                Dirty(uid, component);
-                TryUpdateVisualState((uid, component));
-                return;
-            }
-
             if (component.Broken || component.DispenseOnHitCoolingDown ||
-                component.DispenseOnHitChance == null || args.DamageDelta == null)
+                component.DispenseOnHitChance == null)
                 return;
 
-            if (args.DamageIncreased && args.DamageDelta.GetTotal() >= component.DispenseOnHitThreshold &&
+            if (args.DamageIncreased && args.Damage.GetTotal() >= component.DispenseOnHitThreshold &&
                 _random.Prob(component.DispenseOnHitChance.Value))
             {
                 if (component.DispenseOnHitCooldown != null)

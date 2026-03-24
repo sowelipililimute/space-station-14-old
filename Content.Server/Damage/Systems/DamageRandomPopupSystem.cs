@@ -18,10 +18,10 @@ public sealed class DamageRandomPopupSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<DamageRandomPopupComponent, DamageChangedEvent>(OnDamageChange);
+        SubscribeLocalEvent<DamageRandomPopupComponent, DamageDealtEvent>(OnDamageChange);
     }
 
-    private void OnDamageChange(EntityUid uid, DamageRandomPopupComponent component, DamageChangedEvent args)
+    private void OnDamageChange(EntityUid uid, DamageRandomPopupComponent component, ref DamageDealtEvent args)
     {
         _popupSystem.PopupEntity(Loc.GetString(_random.Pick(component.Popups)), uid);
     }

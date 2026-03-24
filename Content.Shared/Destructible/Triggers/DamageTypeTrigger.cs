@@ -26,7 +26,7 @@ public sealed partial class DamageTypeTrigger : IThresholdTrigger
     [DataField(required: true)]
     public FixedPoint2 Damage = default!;
 
-    public bool Reached(Entity<DamageableComponent> damageable, SharedDestructibleSystem system)
+    public bool Reached(Entity<InjurableComponent> damageable, SharedDestructibleSystem system)
     {
         return system.Damageable.GetAllDamage(damageable.AsNullable()).DamageDict.TryGetValue(DamageType, out var damageReceived) &&
                damageReceived >= Damage;

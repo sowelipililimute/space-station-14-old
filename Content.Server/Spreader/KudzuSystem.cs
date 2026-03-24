@@ -23,14 +23,14 @@ public sealed class KudzuSystem : EntitySystem
     {
         SubscribeLocalEvent<KudzuComponent, ComponentStartup>(SetupKudzu);
         SubscribeLocalEvent<KudzuComponent, SpreadNeighborsEvent>(OnKudzuSpread);
-        SubscribeLocalEvent<KudzuComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<KudzuComponent, InjuriesChangedEvent>(OnInjuriesChanged);
     }
 
-    private void OnDamageChanged(EntityUid uid, KudzuComponent component, DamageChangedEvent args)
+    private void OnInjuriesChanged(EntityUid uid, KudzuComponent component, ref InjuriesChangedEvent args)
     {
         // Every time we take any damage, we reduce growth depending on all damage over the growth impact
         //   So the kudzu gets slower growing the more it is hurt.
-        var growthDamage = (int) (_damageable.GetTotalDamage((uid, args.Damageable)) / component.GrowthHealth);
+        var growthDamage = (int) (_damageable.GetTotalDamage(args.Injurable.AsNullable()) / component.GrowthHealth);
         if (growthDamage > 0)
         {
             if (!EnsureComp<GrowingKudzuComponent>(uid, out _))
@@ -95,7 +95,7 @@ public sealed class KudzuSystem : EntitySystem
         var appearanceQuery = GetEntityQuery<AppearanceComponent>();
         var query = EntityQueryEnumerator<GrowingKudzuComponent>();
         var kudzuQuery = GetEntityQuery<KudzuComponent>();
-        var damageableQuery = GetEntityQuery<DamageableComponent>();
+        var injurableQuery = GetEntityQuery<InjurableComponent>();
         var curTime = _timing.CurTime;
 
         while (query.MoveNext(out var uid, out var grow))
@@ -116,7 +116,7 @@ public sealed class KudzuSystem : EntitySystem
                 continue;
             }
 
-            if (damageableQuery.TryGetComponent(uid, out var damage))
+            if (injurableQuery.TryGetComponent(uid, out var damage))
             {
                 var totalDamage = _damageable.GetTotalDamage((uid, damage));
                 if (totalDamage > 1.0)

@@ -35,7 +35,7 @@ public sealed class CardboardBoxSystem : SharedCardboardBoxSystem
         SubscribeLocalEvent<CardboardBoxComponent, EntInsertedIntoContainerMessage>(OnEntInserted);
         SubscribeLocalEvent<CardboardBoxComponent, EntRemovedFromContainerMessage>(OnEntRemoved);
 
-        SubscribeLocalEvent<CardboardBoxComponent, DamageChangedEvent>(OnDamage);
+        SubscribeLocalEvent<CardboardBoxComponent, DamageDealtEvent>(OnDamage);
     }
 
     private void OnInteracted(EntityUid uid, CardboardBoxComponent component, ActivateInWorldEvent args)
@@ -103,12 +103,12 @@ public sealed class CardboardBoxSystem : SharedCardboardBoxSystem
     }
 
     //Relay damage to the mover
-    private void OnDamage(EntityUid uid, CardboardBoxComponent component, DamageChangedEvent args)
+    private void OnDamage(EntityUid uid, CardboardBoxComponent component, ref DamageDealtEvent args)
     {
-        if (args.DamageDelta == null || !args.DamageIncreased || component.Mover is not { } mover)
+        if (!args.DamageIncreased || component.Mover is not { } mover)
             return;
 
-        _damageable.ChangeDamage(mover, args.DamageDelta, origin: args.Origin);
+        _damageable.ChangeDamage(mover, args.Damage, origin: args.Origin);
     }
 
     private void OnEntInserted(EntityUid uid, CardboardBoxComponent component, EntInsertedIntoContainerMessage args)

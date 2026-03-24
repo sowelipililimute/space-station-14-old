@@ -13,7 +13,7 @@ public sealed partial class AndTrigger : IThresholdTrigger
     [DataField]
     public List<IThresholdTrigger> Triggers = new();
 
-    public bool Reached(Entity<DamageableComponent> damageable, SharedDestructibleSystem system)
+    public bool Reached(Entity<InjurableComponent> damageable, SharedDestructibleSystem system)
     {
         foreach (var trigger in Triggers)
         {

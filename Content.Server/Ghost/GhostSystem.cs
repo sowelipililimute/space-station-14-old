@@ -586,7 +586,7 @@ namespace Content.Server.Ghost
 
                     FixedPoint2 dealtDamage = 200;
 
-                    if (TryComp<DamageableComponent>(playerEntity, out var damageable)
+                    if (TryComp<InjurableComponent>(playerEntity, out var damageable)
                         && TryComp<MobThresholdsComponent>(playerEntity, out var thresholds))
                     {
                         var playerDeadThreshold = _mobThresholdSystem.GetThresholdForState(playerEntity.Value, MobState.Dead, thresholds);

@@ -52,7 +52,7 @@ public sealed class DamagedSiliconAccentSystem : EntitySystem
             {
                 damage = ent.Comp.OverrideTotalDamage.Value;
             }
-            else if (TryComp<DamageableComponent>(uid, out var damageable))
+            else if (TryComp<InjurableComponent>(uid, out var damageable))
             {
                 damage = _damageable.GetTotalDamage((uid, damageable));
             }

@@ -140,7 +140,7 @@ public sealed class SharedExecutionSystem : EntitySystem
         string? internalMsg = entity.Comp.CompleteInternalSelfExecutionMessage;
         string? externalMsg = entity.Comp.CompleteExternalSelfExecutionMessage;
 
-        if (!TryComp<DamageableComponent>(args.Victim, out var damageableComponent))
+        if (!TryComp<InjurableComponent>(args.Victim, out var damageableComponent))
             return;
 
         ShowExecutionInternalPopup(internalMsg, args.Victim, args.Victim, entity, false);

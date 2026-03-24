@@ -64,7 +64,7 @@ public abstract partial class SharedStunSystem
 
         // Crawling
         SubscribeLocalEvent<CrawlerComponent, KnockedDownRefreshEvent>(OnKnockdownRefresh);
-        SubscribeLocalEvent<CrawlerComponent, DamageChangedEvent>(OnDamaged);
+        SubscribeLocalEvent<CrawlerComponent, DamageDealtEvent>(OnDamaged);
         SubscribeLocalEvent<KnockedDownComponent, WeightlessnessChangedEvent>(OnWeightlessnessChanged);
         SubscribeLocalEvent<KnockedDownComponent, DidEquipHandEvent>(OnHandEquipped);
         SubscribeLocalEvent<KnockedDownComponent, DidUnequipHandEvent>(OnHandUnequipped);
@@ -497,13 +497,13 @@ public abstract partial class SharedStunSystem
 
     #region Crawling
 
-    private void OnDamaged(Entity<CrawlerComponent> entity, ref DamageChangedEvent args)
+    private void OnDamaged(Entity<CrawlerComponent> entity, ref DamageDealtEvent args)
     {
         // We only want to extend our knockdown timer if it would've prevented us from standing up
-        if (!args.InterruptsDoAfters || !args.DamageIncreased || args.DamageDelta == null || GameTiming.ApplyingState)
+        if (!args.InterruptsDoAfters || !args.DamageIncreased || GameTiming.ApplyingState)
             return;
 
-        if (args.DamageDelta.GetTotal() >= entity.Comp.KnockdownDamageThreshold)
+        if (args.Damage.GetTotal() >= entity.Comp.KnockdownDamageThreshold)
             RefreshKnockdownTime(entity.Owner, entity.Comp.DefaultKnockedDuration);
     }
 

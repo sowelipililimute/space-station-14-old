@@ -64,7 +64,7 @@ public sealed class DamageOverlayUiController : UIController
 
         if (args.Target != _playerManager.LocalEntity)
             return;
-        UpdateOverlays(args.Target, args.MobState, args.Damageable, args.Threshold);
+        UpdateOverlays(args.Target, args.MobState, args.Injurable, args.Threshold);
     }
 
     private void ClearOverlay()
@@ -76,7 +76,7 @@ public sealed class DamageOverlayUiController : UIController
     }
 
     //TODO: Jezi: adjust oxygen and hp overlays to use appropriate systems once bodysim is implemented
-    private void UpdateOverlays(EntityUid entity, MobStateComponent? mobState, DamageableComponent? damageable = null, MobThresholdsComponent? thresholds = null)
+    private void UpdateOverlays(EntityUid entity, MobStateComponent? mobState, InjurableComponent? damageable = null, MobThresholdsComponent? thresholds = null)
     {
         if (mobState == null && !EntityManager.TryGetComponent(entity, out mobState) ||
             thresholds == null && !EntityManager.TryGetComponent(entity, out thresholds) ||

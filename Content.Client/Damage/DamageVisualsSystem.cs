@@ -136,7 +136,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
     private void InitializeVisualizer(EntityUid entity, DamageVisualsComponent damageVisComp)
     {
         if (!TryComp(entity, out SpriteComponent? spriteComponent)
-            || !TryComp<DamageableComponent>(entity, out var damageComponent)
+            || !TryComp<InjurableComponent>(entity, out var injurable)
             || !HasComp<AppearanceComponent>(entity))
             return;
 
@@ -152,8 +152,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
 
         // If the damage container on our entity's DamageableComponent
         // is not null, we can try to check through its groups.
-        if (damageComponent.DamageContainerID != null
-            && _prototypeManager.Resolve<DamageContainerPrototype>(damageComponent.DamageContainerID, out var damageContainer))
+        if (_prototypeManager.Resolve(injurable.InjuryContainer, out var damageContainer))
         {
             // Are we using damage overlay sprites by group?
             // Check if the container matches the supported groups,
@@ -162,7 +161,8 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
             {
                 foreach (var damageType in damageVisComp.DamageOverlayGroups.Keys)
                 {
-                    if (!damageContainer.SupportedGroups.Contains(damageType))
+                    var groupDamages = _prototypeManager.Index(damageType).DamageTypes;
+                    if (!damageContainer.SupportedTypes.Keys.Any(type => groupDamages.Contains(type)))
                     {
                         Log.Error($"Damage key {damageType} was invalid for entity {entity}.");
                         damageVisComp.Valid = false;
@@ -176,7 +176,8 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
             // See if that group is in our entity's damage container.
             else if (!damageVisComp.Overlay && damageVisComp.DamageGroup != null)
             {
-                if (!damageContainer.SupportedGroups.Contains(damageVisComp.DamageGroup.Value))
+                var groupDamages = _prototypeManager.Index(damageVisComp.DamageGroup).DamageTypes;
+                if (!damageContainer.SupportedTypes.Keys.Any(type => groupDamages.Contains(type)))
                 {
                     Log.Error($"Damage keys were invalid for entity {entity}.");
                     damageVisComp.Valid = false;
@@ -361,7 +362,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
     private void HandleDamage(EntityUid uid, AppearanceComponent component, DamageVisualsComponent damageVisComp)
     {
         if (!TryComp(uid, out SpriteComponent? spriteComponent)
-            || !TryComp(uid, out DamageableComponent? damageComponent))
+            || !TryComp(uid, out InjurableComponent? damageComponent))
             return;
 
         if (damageVisComp.TargetLayers != null && damageVisComp.DamageOverlayGroups != null)
@@ -486,7 +487,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
     ///     Updates damage visuals without tracking
     ///     any damage groups.
     /// </summary>
-    private void UpdateDamageVisuals(Entity<DamageableComponent, SpriteComponent, DamageVisualsComponent> entity)
+    private void UpdateDamageVisuals(Entity<InjurableComponent, SpriteComponent, DamageVisualsComponent> entity)
     {
         var spriteComponent = entity.Comp2;
         var damageVisComp = entity.Comp3;
@@ -514,7 +515,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
     ///     according to the list of damage groups
     ///     passed into it.
     /// </summary>
-    private void UpdateDamageVisuals(List<ProtoId<DamageGroupPrototype>> delta, Entity<DamageableComponent, SpriteComponent, DamageVisualsComponent> entity)
+    private void UpdateDamageVisuals(List<ProtoId<DamageGroupPrototype>> delta, Entity<InjurableComponent, SpriteComponent, DamageVisualsComponent> entity)
     {
         var spriteComponent = entity.Comp2;
         var damageVisComp = entity.Comp3;
@@ -581,7 +582,7 @@ public sealed class DamageVisualsSystem : VisualizerSystem<DamageVisualsComponen
     ///     Does different things depending on
     ///     the configuration of the visualizer.
     /// </summary>
-    private void ForceUpdateLayers(Entity<DamageableComponent, SpriteComponent, DamageVisualsComponent> entity)
+    private void ForceUpdateLayers(Entity<InjurableComponent, SpriteComponent, DamageVisualsComponent> entity)
     {
         var damageVisComp = entity.Comp3;
 

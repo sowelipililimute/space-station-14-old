@@ -100,7 +100,7 @@ public sealed class MedibotSystem : EntitySystem
         }
 
         if (!TryComp<MobStateComponent>(target, out var mobState)) return false;
-        if (!TryComp<DamageableComponent>(target, out var damageable)) return false;
+        if (!TryComp<InjurableComponent>(target, out var damageable)) return false;
         if (!_solutionContainer.TryGetInjectableSolution(target, out _, out _)) return false;
 
         if (mobState.CurrentState != MobState.Alive && mobState.CurrentState != MobState.Critical)

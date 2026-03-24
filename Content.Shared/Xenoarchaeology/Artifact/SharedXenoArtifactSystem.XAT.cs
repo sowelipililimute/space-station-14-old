@@ -16,7 +16,7 @@ public abstract partial class SharedXenoArtifactSystem
 {
     private void InitializeXAT()
     {
-        XATRelayLocalEvent<DamageChangedEvent>();
+        XATRelayLocalEvent<DamageDealtEvent>();
         XATRelayLocalEvent<InteractUsingEvent>();
         XATRelayLocalEvent<PullStartedMessage>();
         XATRelayLocalEvent<AttackedEvent>();

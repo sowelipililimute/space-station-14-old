@@ -56,7 +56,7 @@ public sealed partial class SleepingSystem : EntitySystem
         SubscribeLocalEvent<MobStateComponent, WakeActionEvent>(OnWakeAction);
         SubscribeLocalEvent<MobStateComponent, SleepActionEvent>(OnSleepAction);
 
-        SubscribeLocalEvent<SleepingComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<SleepingComponent, DamageDealtEvent>(OnDamageDealt);
         SubscribeLocalEvent<SleepingComponent, EntityZombifiedEvent>(OnZombified);
         SubscribeLocalEvent<SleepingComponent, MobStateChangedEvent>(OnMobStateChanged);
         SubscribeLocalEvent<SleepingComponent, ComponentInit>(OnCompInit);
@@ -245,12 +245,9 @@ public sealed partial class SleepingSystem : EntitySystem
     /// <summary>
     /// Wake up on taking an instance of damage at least the value of WakeThreshold.
     /// </summary>
-    private void OnDamageChanged(Entity<SleepingComponent> ent, ref DamageChangedEvent args)
+    private void OnDamageDealt(Entity<SleepingComponent> ent, ref DamageDealtEvent args)
     {
-        if (!args.DamageIncreased || args.DamageDelta == null)
-            return;
-
-        if (args.DamageDelta.GetTotal() >= ent.Comp.WakeThreshold)
+        if (args.Damage.GetTotal() >= ent.Comp.WakeThreshold)
             TryWaking((ent, ent.Comp));
     }
 

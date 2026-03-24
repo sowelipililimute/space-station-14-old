@@ -35,7 +35,7 @@ public sealed class SuicideSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<DamageableComponent, SuicideEvent>(OnDamageableSuicide);
+        SubscribeLocalEvent<InjurableComponent, SuicideEvent>(OnInjurableSuicide);
         SubscribeLocalEvent<MobStateComponent, SuicideEvent>(OnEnvironmentalSuicide);
         SubscribeLocalEvent<MindContainerComponent, SuicideGhostEvent>(OnSuicideGhost);
     }
@@ -151,7 +151,7 @@ public sealed class SuicideSystem : EntitySystem
     /// <summary>
     /// Default suicide behavior for any kind of entity that can take damage
     /// </summary>
-    private void OnDamageableSuicide(Entity<DamageableComponent> victim, ref SuicideEvent args)
+    private void OnInjurableSuicide(Entity<InjurableComponent> victim, ref SuicideEvent args)
     {
         if (args.Handled)
             return;

@@ -83,7 +83,7 @@ namespace Content.Server.Atmos.EntitySystems
 
             SubscribeLocalEvent<ExtinguishOnInteractComponent, ActivateInWorldEvent>(OnExtinguishActivateInWorld);
 
-            SubscribeLocalEvent<IgniteOnHeatDamageComponent, DamageChangedEvent>(OnDamageChanged);
+            SubscribeLocalEvent<IgniteOnHeatDamageComponent, DamageDealtEvent>(OnDamageChanged);
         }
 
         private void OnExtinguishEvent(Entity<FlammableComponent> ent, ref ExtinguishEvent args)
@@ -351,18 +351,14 @@ namespace Content.Server.Atmos.EntitySystems
             UpdateAppearance(uid, flammable);
         }
 
-        private void OnDamageChanged(EntityUid uid, IgniteOnHeatDamageComponent component, DamageChangedEvent args)
+        private void OnDamageChanged(EntityUid uid, IgniteOnHeatDamageComponent component, ref DamageDealtEvent args)
         {
             // Make sure the entity is flammable
             if (!TryComp<FlammableComponent>(uid, out var flammable))
                 return;
 
-            // Make sure the damage delta isn't null
-            if (args.DamageDelta == null)
-                return;
-
             // Check if its' taken any heat damage, and give the value
-            if (args.DamageDelta.DamageDict.TryGetValue("Heat", out FixedPoint2 value))
+            if (args.Damage.DamageDict.TryGetValue("Heat", out FixedPoint2 value))
             {
                 // Make sure the value is greater than the threshold
                 if(value <= component.Threshold)

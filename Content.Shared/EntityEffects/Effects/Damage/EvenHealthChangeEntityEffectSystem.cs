@@ -12,15 +12,15 @@ namespace Content.Shared.EntityEffects.Effects.Damage;
 /// Total adjustment is modified by scale.
 /// </summary>
 /// <inheritdoc cref="EntityEffectSystem{T,TEffect}"/>
-public sealed partial class EvenHealthChangeEntityEffectSystem : EntityEffectSystem<DamageableComponent, EvenHealthChange>
+public sealed partial class EvenHealthChangeEntityEffectSystem : EntityEffectSystem<InjurableComponent, EvenHealthChange>
 {
-    [Dependency] private readonly DamageableSystem _damageable = default!;
+    [Dependency] private readonly InjurableSystem _injurable = default!;
 
-    protected override void Effect(Entity<DamageableComponent> entity, ref EntityEffectEvent<EvenHealthChange> args)
+    protected override void Effect(Entity<InjurableComponent> entity, ref EntityEffectEvent<EvenHealthChange> args)
     {
         foreach (var (group, amount) in args.Effect.Damage)
         {
-            _damageable.HealEvenly(entity.AsNullable(), amount * args.Scale, group);
+            _injurable.HealEvenly(entity.AsNullable(), amount * args.Scale, group);
         }
     }
 }

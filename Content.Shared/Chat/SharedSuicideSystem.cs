@@ -18,7 +18,7 @@ public sealed class SharedSuicideSystem : EntitySystem
     /// <summary>
     /// Applies lethal damage spread out across the damage types given.
     /// </summary>
-    public void ApplyLethalDamage(Entity<DamageableComponent> target, DamageSpecifier damageSpecifier)
+    public void ApplyLethalDamage(Entity<InjurableComponent> target, DamageSpecifier damageSpecifier)
     {
         // Create a new damageSpecifier so that we don't make alterations to the original DamageSpecifier
         // Failing  to do this will permanently change a weapon's damage making it insta-kill people
@@ -42,13 +42,13 @@ public sealed class SharedSuicideSystem : EntitySystem
             appliedDamageSpecifier.DamageDict[key] = Math.Ceiling((double) (value * lethalAmountOfDamage / totalDamage));
         }
 
-        _damageableSystem.ChangeDamage(target.AsNullable(), appliedDamageSpecifier, true, origin: target);
+        _damageableSystem.ChangeDamage(target.Owner, appliedDamageSpecifier, true, origin: target);
     }
 
     /// <summary>
     /// Applies lethal damage in a single type, specified by a single damage type.
     /// </summary>
-    public void ApplyLethalDamage(Entity<DamageableComponent> target, ProtoId<DamageTypePrototype>? damageType)
+    public void ApplyLethalDamage(Entity<InjurableComponent> target, ProtoId<DamageTypePrototype>? damageType)
     {
         if (!TryComp<MobThresholdsComponent>(target, out var mobThresholds))
             return;
@@ -66,6 +66,6 @@ public sealed class SharedSuicideSystem : EntitySystem
         }
 
         var damage = new DamageSpecifier(damagePrototype, lethalAmountOfDamage);
-        _damageableSystem.ChangeDamage(target.AsNullable(), damage, true, origin: target);
+        _damageableSystem.ChangeDamage(target.Owner, damage, true, origin: target);
     }
 }

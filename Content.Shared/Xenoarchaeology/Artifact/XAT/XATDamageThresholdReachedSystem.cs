@@ -18,17 +18,17 @@ public sealed class XATDamageThresholdReachedSystem : BaseXATSystem<XATDamageThr
     {
         base.Initialize();
 
-        XATSubscribeDirectEvent<DamageChangedEvent>(OnDamageChanged);
+        XATSubscribeDirectEvent<DamageDealtEvent>(OnDamageDealt);
     }
 
-    private void OnDamageChanged(Entity<XenoArtifactComponent> artifact, Entity<XATDamageThresholdReachedComponent, XenoArtifactNodeComponent> node, ref DamageChangedEvent args)
+    private void OnDamageDealt(Entity<XenoArtifactComponent> artifact, Entity<XATDamageThresholdReachedComponent, XenoArtifactNodeComponent> node, ref DamageDealtEvent args)
     {
-        if (!args.DamageIncreased || args.DamageDelta == null || args.Origin == artifact.Owner)
+        if (!args.DamageIncreased || args.Origin == artifact.Owner)
             return;
 
         var damageTriggerComponent = node.Comp1;
         if (Timing.IsFirstTimePredicted)
-            damageTriggerComponent.AccumulatedDamage += args.DamageDelta;
+            damageTriggerComponent.AccumulatedDamage += args.Damage;
 
         foreach (var (type, needed) in damageTriggerComponent.TypesNeeded)
         {

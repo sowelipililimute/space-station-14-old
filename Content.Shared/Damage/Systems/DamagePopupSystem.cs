@@ -12,29 +12,26 @@ public sealed class DamagePopupSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<DamagePopupComponent, DamageChangedEvent>(OnDamageChange);
+        SubscribeLocalEvent<DamagePopupComponent, DamageDealtEvent>(OnDamageDealt);
         SubscribeLocalEvent<DamagePopupComponent, InteractHandEvent>(OnInteractHand);
     }
 
-    private void OnDamageChange(Entity<DamagePopupComponent> ent, ref DamageChangedEvent args)
+    private void OnDamageDealt(Entity<DamagePopupComponent> ent, ref DamageDealtEvent args)
     {
-        if (args.DamageDelta != null)
+        var damageTotal = _damageable.GetTotalDamage(ent.Owner);
+        var damageDelta = args.Damage.GetTotal();
+
+        var msg = ent.Comp.Type switch
         {
-            var damageTotal = _damageable.GetTotalDamage((ent, args.Damageable));
-            var damageDelta = args.DamageDelta.GetTotal();
+            DamagePopupType.Delta => damageDelta.ToString(),
+            DamagePopupType.Total => damageTotal.ToString(),
+            DamagePopupType.Combined => damageDelta + " | " + damageTotal,
+            DamagePopupType.Hit => "!",
+            _ => "Invalid type",
+        };
 
-            var msg = ent.Comp.Type switch
-            {
-                DamagePopupType.Delta => damageDelta.ToString(),
-                DamagePopupType.Total => damageTotal.ToString(),
-                DamagePopupType.Combined => damageDelta + " | " + damageTotal,
-                DamagePopupType.Hit => "!",
-                _ => "Invalid type",
-            };
-
-            // Turn this back into (msg, ent.Owner, args.Origin) when shooting gets predicted.
-            _popupSystem.PopupPredicted(msg, ent.Owner, null);
-        }
+        // Turn this back into (msg, ent.Owner, args.Origin) when shooting gets predicted.
+        _popupSystem.PopupPredicted(msg, ent.Owner, null);
     }
 
     private void OnInteractHand(Entity<DamagePopupComponent> ent, ref InteractHandEvent args)

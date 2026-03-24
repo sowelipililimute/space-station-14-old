@@ -167,7 +167,7 @@ public sealed partial class BorgSystem
     /// </summary>
     private float CalcHP(EntityUid uid)
     {
-        if (!TryComp<DamageableComponent>(uid, out var damageable))
+        if (!TryComp<InjurableComponent>(uid, out var damageable))
             return 1;
 
         if (!_mobState.IsAlive(uid))

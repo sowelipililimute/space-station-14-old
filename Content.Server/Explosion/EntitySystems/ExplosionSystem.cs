@@ -64,7 +64,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
     private EntityQuery<ProjectileComponent> _projectileQuery;
     private EntityQuery<ActorComponent> _actorQuery;
     private EntityQuery<DestructibleComponent> _destructibleQuery;
-    private EntityQuery<DamageableComponent> _damageableQuery;
+    private EntityQuery<InjurableComponent> _injurableQuery;
     private EntityQuery<AirtightComponent> _airtightQuery;
     private EntityQuery<TileHistoryComponent> _tileHistoryQuery;
 
@@ -97,7 +97,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         SubscribeLocalEvent<MapRemovedEvent>(OnMapRemoved);
 
         // handled in ExplosionSystemAirtight.cs
-        SubscribeLocalEvent<AirtightComponent, DamageChangedEvent>(OnAirtightDamaged);
+        SubscribeLocalEvent<AirtightComponent, InjuriesChangedEvent>(OnAirtightInjuriesChanged);
         SubscribeCvars();
         InitAirtightMap();
         InitVisuals();
@@ -107,7 +107,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         _projectileQuery = GetEntityQuery<ProjectileComponent>();
         _actorQuery = GetEntityQuery<ActorComponent>();
         _destructibleQuery = GetEntityQuery<DestructibleComponent>();
-        _damageableQuery = GetEntityQuery<DamageableComponent>();
+        _injurableQuery = GetEntityQuery<InjurableComponent>();
         _airtightQuery = GetEntityQuery<AirtightComponent>();
         _tileHistoryQuery = GetEntityQuery<TileHistoryComponent>();
 

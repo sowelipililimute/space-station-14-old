@@ -298,7 +298,7 @@ namespace Content.Server.Kitchen.EntitySystems
                 return;
 
             // The act of getting your head microwaved doesn't actually kill you
-            if (!TryComp<DamageableComponent>(args.Victim, out var damageableComponent))
+            if (!TryComp<InjurableComponent>(args.Victim, out var damageableComponent))
                 return;
 
             // The application of lethal damage is what kills you...

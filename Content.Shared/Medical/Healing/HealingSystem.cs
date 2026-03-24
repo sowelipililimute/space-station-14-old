@@ -38,10 +38,10 @@ public sealed class HealingSystem : EntitySystem
 
         SubscribeLocalEvent<HealingComponent, UseInHandEvent>(OnHealingUse);
         SubscribeLocalEvent<HealingComponent, AfterInteractEvent>(OnHealingAfterInteract);
-        SubscribeLocalEvent<DamageableComponent, HealingDoAfterEvent>(OnDoAfter);
+        SubscribeLocalEvent<InjurableComponent, HealingDoAfterEvent>(OnDoAfter);
     }
 
-    private void OnDoAfter(Entity<DamageableComponent> target, ref HealingDoAfterEvent args)
+    private void OnDoAfter(Entity<InjurableComponent> target, ref HealingDoAfterEvent args)
     {
 
         if (args.Handled || args.Cancelled)
@@ -50,9 +50,8 @@ public sealed class HealingSystem : EntitySystem
         if (!TryComp(args.Used, out HealingComponent? healing))
             return;
 
-        if (healing.DamageContainers is not null &&
-            target.Comp.DamageContainerID is not null &&
-            !healing.DamageContainers.Contains(target.Comp.DamageContainerID.Value))
+        if (healing.InjuryContainers is not null &&
+            !healing.InjuryContainers.Contains(target.Comp.InjuryContainer))
         {
             return;
         }
@@ -124,7 +123,7 @@ public sealed class HealingSystem : EntitySystem
             args.Args.Delay = healing.Delay * GetScaledHealingPenalty(target.Owner, healing.SelfHealPenaltyMultiplier);
     }
 
-    private bool HasDamage(Entity<HealingComponent> healing, Entity<DamageableComponent> target)
+    private bool HasDamage(Entity<HealingComponent> healing, Entity<InjurableComponent> target)
     {
         var damageableDict = _damageable.GetAllDamage(target.AsNullable()).DamageDict;
         var healingDict = healing.Comp.Damage.DamageDict;
@@ -174,14 +173,13 @@ public sealed class HealingSystem : EntitySystem
             args.Handled = true;
     }
 
-    private bool TryHeal(Entity<HealingComponent> healing, Entity<DamageableComponent?> target, EntityUid user)
+    private bool TryHeal(Entity<HealingComponent> healing, Entity<InjurableComponent?> target, EntityUid user)
     {
         if (!Resolve(target, ref target.Comp, false))
             return false;
 
-        if (healing.Comp.DamageContainers is not null &&
-            target.Comp.DamageContainerID is not null &&
-            !healing.Comp.DamageContainers.Contains(target.Comp.DamageContainerID.Value))
+        if (healing.Comp.InjuryContainers is not null &&
+            !healing.Comp.InjuryContainers.Contains(target.Comp.InjuryContainer))
         {
             return false;
         }
@@ -232,7 +230,7 @@ public sealed class HealingSystem : EntitySystem
     /// <param name="ent">Entity we're healing</param>
     /// <param name="mod">Maximum modifier we can have.</param>
     /// <returns>Modifier we multiply our healing time by</returns>
-    public float GetScaledHealingPenalty(Entity<DamageableComponent?, MobThresholdsComponent?> ent, float mod)
+    public float GetScaledHealingPenalty(Entity<InjurableComponent?, MobThresholdsComponent?> ent, float mod)
     {
         if (!Resolve(ent, ref ent.Comp1, ref ent.Comp2, false))
             return mod;

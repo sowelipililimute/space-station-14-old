@@ -45,7 +45,7 @@ namespace Content.Server.Guardian
 
             SubscribeLocalEvent<GuardianComponent, ComponentShutdown>(OnGuardianShutdown);
             SubscribeLocalEvent<GuardianComponent, MoveEvent>(OnGuardianMove);
-            SubscribeLocalEvent<GuardianComponent, DamageChangedEvent>(OnGuardianDamaged);
+            SubscribeLocalEvent<GuardianComponent, DamageDealtEvent>(OnGuardianDamaged);
             SubscribeLocalEvent<GuardianComponent, PlayerAttachedEvent>(OnGuardianPlayerAttached);
             SubscribeLocalEvent<GuardianComponent, PlayerDetachedEvent>(OnGuardianPlayerDetached);
 
@@ -280,14 +280,14 @@ namespace Content.Server.Guardian
         /// <summary>
         /// Handles guardian receiving damage and splitting it with the host according to his defence percent
         /// </summary>
-        private void OnGuardianDamaged(EntityUid uid, GuardianComponent component, DamageChangedEvent args)
+        private void OnGuardianDamaged(EntityUid uid, GuardianComponent component, ref DamageDealtEvent args)
         {
-            if (args.DamageDelta == null || component.Host == null || component.DamageShare == 0)
+            if (component.Host == null || component.DamageShare == 0)
                 return;
 
             _damageSystem.ChangeDamage(
                 component.Host.Value,
-                args.DamageDelta * component.DamageShare,
+                args.Damage * component.DamageShare,
                 origin: args.Origin,
                 ignoreResistances: true,
                 interruptsDoAfters: false);

@@ -21,10 +21,10 @@ public sealed class EmoteOnDamageSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<EmoteOnDamageComponent, DamageChangedEvent>(OnDamage);
+        SubscribeLocalEvent<EmoteOnDamageComponent, DamageDealtEvent>(OnDamage);
     }
 
-    private void OnDamage(EntityUid uid, EmoteOnDamageComponent emoteOnDamage, DamageChangedEvent args)
+    private void OnDamage(EntityUid uid, EmoteOnDamageComponent emoteOnDamage, ref DamageDealtEvent args)
     {
         if (!args.DamageIncreased)
             return;

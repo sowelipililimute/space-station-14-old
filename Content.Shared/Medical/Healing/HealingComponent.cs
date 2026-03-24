@@ -32,12 +32,12 @@ public sealed partial class HealingComponent : Component
     public float ModifyBloodLevel = 0.0f;
 
     /// <remarks>
-    /// The supported damage types are specified using a <see cref="DamageContainerPrototype"/>s. For a
+    /// The supported damage types are specified using a <see cref="InjuryContainerPrototype"/>s. For a
     /// HealingComponent this filters what damage container type this component should work on. If null,
     /// all damage container types are supported.
     /// </remarks>
     [DataField, AutoNetworkedField]
-    public List<ProtoId<DamageContainerPrototype>>? DamageContainers;
+    public List<ProtoId<InjuryContainerPrototype>>? InjuryContainers;
 
     /// <summary>
     /// How long it takes to apply the damage.

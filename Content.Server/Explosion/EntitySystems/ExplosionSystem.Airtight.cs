@@ -190,7 +190,7 @@ public sealed partial class ExplosionSystem
     /// <summary>
     ///     On receiving damage, re-evaluate how much explosion damage is needed to destroy an airtight entity.
     /// </summary>
-    private void OnAirtightDamaged(EntityUid uid, AirtightComponent airtight, DamageChangedEvent args)
+    private void OnAirtightInjuriesChanged(EntityUid uid, AirtightComponent airtight, ref InjuriesChangedEvent args)
     {
         // do we need to update our explosion blocking map?
         if (!airtight.AirBlocked)
@@ -219,7 +219,7 @@ public sealed partial class ExplosionSystem
             totalDamageTarget = _destructibleSystem.DestroyedAt(uid, destructible);
         }
 
-        if (totalDamageTarget == FixedPoint2.MaxValue || !_damageableQuery.TryGetComponent(uid, out var damageable))
+        if (totalDamageTarget == FixedPoint2.MaxValue || !_injurableQuery.TryGetComponent(uid, out var damageable))
         {
             for (var i = 0; i < explosionTolerance.Length; i++)
             {

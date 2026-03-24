@@ -207,11 +207,11 @@ namespace Content.Server.Atmos.EntitySystems
 
             _timer -= UpdateTimer;
 
-            var enumerator = EntityQueryEnumerator<BarotraumaComponent, DamageableComponent>();
-            while (enumerator.MoveNext(out var uid, out var barotrauma, out var damageable))
+            var enumerator = EntityQueryEnumerator<BarotraumaComponent, InjurableComponent>();
+            while (enumerator.MoveNext(out var uid, out var barotrauma, out var injurable))
             {
                 var totalDamage = FixedPoint2.Zero;
-                var damageSpecifier = _damageableSystem.GetAllDamage((uid, damageable));
+                var damageSpecifier = _damageableSystem.GetAllDamage((uid, injurable));
                 foreach (var (barotraumaDamageType, _) in barotrauma.Damage.DamageDict)
                 {
                     if (!damageSpecifier.DamageDict.TryGetValue(barotraumaDamageType, out var damage))

@@ -38,7 +38,7 @@ public sealed class ExaminableDamageSystem : EntitySystem
     /// <returns>How damaged the entity is from 0 to 1</returns>
     private float GetDamagePercent(Entity<ExaminableDamageComponent> ent)
     {
-        if (!TryComp<DamageableComponent>(ent, out var damageable))
+        if (!TryComp<InjurableComponent>(ent, out var damageable))
             return 0;
 
         var damage = _damageable.GetTotalDamage((ent, damageable));

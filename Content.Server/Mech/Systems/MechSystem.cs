@@ -60,7 +60,8 @@ public sealed partial class MechSystem : SharedMechSystem
         SubscribeLocalEvent<MechComponent, MechEntryEvent>(OnMechEntry);
         SubscribeLocalEvent<MechComponent, MechExitEvent>(OnMechExit);
 
-        SubscribeLocalEvent<MechComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<MechComponent, DamageDealtEvent>(OnDamageDealt);
+        SubscribeLocalEvent<MechComponent, InjuriesChangedEvent>(OnInjuriesChanged);
         SubscribeLocalEvent<MechComponent, MechEquipmentRemoveMessage>(OnRemoveEquipmentMessage);
 
         SubscribeLocalEvent<MechComponent, UpdateCanMoveEvent>(OnMechCanMoveEvent);
@@ -257,18 +258,20 @@ public sealed partial class MechSystem : SharedMechSystem
         args.Handled = true;
     }
 
-    private void OnDamageChanged(EntityUid uid, MechComponent component, DamageChangedEvent args)
+    private void OnDamageDealt(Entity<MechComponent> ent, ref DamageDealtEvent args)
     {
-        var integrity = component.MaxIntegrity - _damageable.GetTotalDamage((uid, args.Damageable));
-        SetIntegrity(uid, integrity, component);
-
         if (args.DamageIncreased &&
-            args.DamageDelta != null &&
-            component.PilotSlot.ContainedEntity != null)
+            ent.Comp.PilotSlot.ContainedEntity != null)
         {
-            var damage = args.DamageDelta * component.MechToPilotDamageMultiplier;
-            _damageable.ChangeDamage(component.PilotSlot.ContainedEntity.Value, damage);
+            var damage = args.Damage * ent.Comp.MechToPilotDamageMultiplier;
+            _damageable.ChangeDamage(ent.Comp.PilotSlot.ContainedEntity.Value, damage);
         }
+    }
+
+    private void OnInjuriesChanged(Entity<MechComponent> ent, ref InjuriesChangedEvent args)
+    {
+        var integrity = ent.Comp.MaxIntegrity - _damageable.GetTotalDamage(args.Injurable.AsNullable());
+        SetIntegrity(ent, integrity, ent);
     }
 
     private void ToggleMechUi(EntityUid uid, MechComponent? component = null, EntityUid? user = null)

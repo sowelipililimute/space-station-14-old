@@ -31,7 +31,7 @@ public sealed class DamageForceSaySystem : EntitySystem
         // need to raise after mobthreshold
         // so that we don't accidentally raise one for damage before one for mobstate
         // (this won't double raise, because of the cooldown)
-        SubscribeLocalEvent<DamageForceSayComponent, DamageChangedEvent>(OnDamageChanged, after: new []{ typeof(MobThresholdSystem)} );
+        SubscribeLocalEvent<DamageForceSayComponent, DamageDealtEvent>(OnDamageChanged, after: new []{ typeof(MobThresholdSystem)} );
         SubscribeLocalEvent<DamageForceSayComponent, SleepStateChangedEvent>(OnSleep);
     }
 
@@ -97,15 +97,15 @@ public sealed class DamageForceSaySystem : EntitySystem
         TryForceSay(uid, component);
     }
 
-    private void OnDamageChanged(EntityUid uid, DamageForceSayComponent component, DamageChangedEvent args)
+    private void OnDamageChanged(EntityUid uid, DamageForceSayComponent component, ref DamageDealtEvent args)
     {
-        if (args.DamageDelta == null || !args.DamageIncreased || args.DamageDelta.GetTotal() < component.DamageThreshold)
+        if (!args.DamageIncreased || args.Damage.GetTotal() < component.DamageThreshold)
             return;
 
         if (component.ValidDamageGroups != null)
         {
             var totalApplicableDamage = FixedPoint2.Zero;
-            foreach (var (group, value) in args.DamageDelta.GetDamagePerGroup(_prototype))
+            foreach (var (group, value) in args.Damage.GetDamagePerGroup(_prototype))
             {
                 if (!component.ValidDamageGroups.Contains(group))
                     continue;

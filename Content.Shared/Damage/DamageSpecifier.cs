@@ -435,7 +435,7 @@ namespace Content.Shared.Damage
             return true;
         }
 
-        public FixedPoint2 this[string key] => DamageDict[key];
+        public FixedPoint2 this[ProtoId<DamageTypePrototype> key] => DamageDict[key];
     }
     #endregion
 }

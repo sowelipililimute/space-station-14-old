@@ -1,12 +1,9 @@
+using System.Linq;
 using Content.Shared.CCVar;
 using Content.Shared.Damage.Components;
-using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
 using Content.Shared.Inventory;
 using Content.Shared.Radiation.Events;
-using Content.Shared.Rejuvenate;
-using Robust.Shared.GameStates;
-using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Damage.Systems;
 
@@ -14,16 +11,8 @@ public sealed partial class DamageableSystem
 {
     public override void Initialize()
     {
-        RebuildContainerCache();
-
-        SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
-        SubscribeLocalEvent<DamageableComponent, ComponentInit>(DamageableInit);
         SubscribeLocalEvent<DamageableComponent, OnIrradiatedEvent>(OnIrradiated);
-        SubscribeLocalEvent<DamageableComponent, RejuvenateEvent>(OnRejuvenate);
-        SubscribeLocalEvent<DamageableComponent, ComponentHandleState>(DamageableHandleState);
-        SubscribeLocalEvent<DamageableComponent, ComponentGetState>(DamageableGetState);
 
-        _appearanceQuery = GetEntityQuery<AppearanceComponent>();
         _damageableQuery = GetEntityQuery<DamageableComponent>();
 
         // Damage modifier CVars are updated and stored here to be queried in other systems.
@@ -123,48 +112,6 @@ public sealed partial class DamageableSystem
         );
     }
 
-    private void OnPrototypesReloaded(PrototypesReloadedEventArgs ev)
-    {
-        if (!ev.WasModified<DamageContainerPrototype>() && !ev.WasModified<DamageGroupPrototype>())
-            return;
-
-        RebuildContainerCache();
-    }
-
-    private void RebuildContainerCache()
-    {
-        _supportedTypesByContainer.Clear();
-
-        foreach (var proto in _prototypeManager.EnumeratePrototypes<DamageContainerPrototype>())
-        {
-            var set = new HashSet<ProtoId<DamageTypePrototype>>();
-            _supportedTypesByContainer[proto.ID] = set;
-
-            foreach (var type in proto.SupportedTypes)
-            {
-                set.Add(type);
-            }
-
-            foreach (var groupId in proto.SupportedGroups)
-            {
-                var group = _prototypeManager.Index(groupId);
-                foreach (var type in group.DamageTypes)
-                {
-                    set.Add(type);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Initialize a damageable component
-    /// </summary>
-    private void DamageableInit(Entity<DamageableComponent> ent, ref ComponentInit _)
-    {
-        ent.Comp.Damage.GetDamagePerGroup(_prototypeManager, ent.Comp.DamagePerGroup);
-        ent.Comp.TotalDamage = ent.Comp.Damage.GetTotal();
-    }
-
     private void OnIrradiated(Entity<DamageableComponent> ent, ref OnIrradiatedEvent args)
     {
         var damageValue = FixedPoint2.New(args.TotalRads);
@@ -177,46 +124,6 @@ public sealed partial class DamageableSystem
         }
 
         ChangeDamage(ent.Owner, damage, interruptsDoAfters: false, origin: args.Origin);
-    }
-
-    private void OnRejuvenate(Entity<DamageableComponent> ent, ref RejuvenateEvent args)
-    {
-        // Do this so that the state changes when we set the damage
-        _mobThreshold.SetAllowRevives(ent, true);
-        ClearAllDamage(ent.AsNullable());
-        _mobThreshold.SetAllowRevives(ent, false);
-    }
-
-    private void DamageableGetState(Entity<DamageableComponent> ent, ref ComponentGetState args)
-    {
-        args.State = new DamageableComponentState(
-            _netMan.IsServer ? ent.Comp.Damage : ent.Comp.Damage.Clone(),
-            ent.Comp.DamageContainerID,
-            ent.Comp.DamageModifierSetId,
-            ent.Comp.HealthBarThreshold
-        );
-    }
-
-    private void DamageableHandleState(Entity<DamageableComponent> ent, ref ComponentHandleState args)
-    {
-        if (args.Current is not DamageableComponentState state)
-            return;
-
-        ent.Comp.DamageContainerID = state.DamageContainerId;
-        ent.Comp.DamageModifierSetId = state.ModifierSetId;
-        ent.Comp.HealthBarThreshold = state.HealthBarThreshold;
-
-        // Has the damage actually changed?
-        var newDamage = state.Damage.Clone();
-        var delta = newDamage - ent.Comp.Damage;
-        delta.TrimZeros();
-
-        if (delta.Empty)
-            return;
-
-        ent.Comp.Damage = newDamage;
-
-        OnEntityDamageChanged(ent, delta);
     }
 }
 
@@ -259,65 +166,15 @@ public sealed class DamageModifyEvent(DamageSpecifier damage, EntityUid? origin 
     public readonly EntityUid? Origin = origin;
 }
 
-public sealed class DamageChangedEvent : EntityEventArgs
+/// <summary>
+/// Event raised when an entity with <see cref="DamageableComponent" /> has taken some amount of damage.
+/// </summary>
+/// <param name="Damage">The amount of damage the entity is being subject to.</param>
+/// <param name="Origin">The originator of the damage</param>
+/// <param name="InterruptsDoAfters">If the damage being dealt will interrupt do-afters</param>
+[ByRefEvent]
+public readonly record struct DamageDealtEvent(DamageSpecifier Damage, EntityUid? Origin, bool InterruptsDoAfters)
 {
-    /// <summary>
-    ///     This is the component whose damage was changed.
-    /// </summary>
-    /// <remarks>
-    ///     Given that nearly every component that cares about a change in the damage, needs to know the
-    ///     current damage values, directly passing this information prevents a lot of duplicate
-    ///     Owner.TryGetComponent() calls.
-    /// </remarks>
-    public readonly DamageableComponent Damageable;
-
-    /// <summary>
-    ///     The amount by which the damage has changed. If the damage was set directly to some number, this will be
-    ///     null.
-    /// </summary>
-    public readonly DamageSpecifier? DamageDelta;
-
-    /// <summary>
-    ///     Was any of the damage change dealing damage, or was it all healing?
-    /// </summary>
-    public readonly bool DamageIncreased;
-
-    /// <summary>
-    ///     Does this event interrupt DoAfters?
-    ///     Note: As provided in the constructor, this *does not* account for DamageIncreased.
-    ///     As written into the event, this *does* account for DamageIncreased.
-    /// </summary>
-    public readonly bool InterruptsDoAfters;
-
-    /// <summary>
-    ///     Contains the entity which caused the change in damage, if any was responsible.
-    /// </summary>
-    public readonly EntityUid? Origin;
-
-    public DamageChangedEvent(
-        DamageableComponent damageable,
-        DamageSpecifier? damageDelta,
-        bool interruptsDoAfters,
-        EntityUid? origin
-    )
-    {
-        Damageable = damageable;
-        DamageDelta = damageDelta;
-        Origin = origin;
-
-        if (DamageDelta is null)
-            return;
-
-        foreach (var damageChange in DamageDelta.DamageDict.Values)
-        {
-            if (damageChange <= 0)
-                continue;
-
-            DamageIncreased = true;
-
-            break;
-        }
-
-        InterruptsDoAfters = interruptsDoAfters && DamageIncreased;
-    }
+    [Obsolete("You should not be dealing negative damage")]
+    public readonly bool DamageIncreased = Damage.DamageDict.Values.Any(change => change > FixedPoint2.Zero);
 }

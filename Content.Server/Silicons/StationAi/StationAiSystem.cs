@@ -54,6 +54,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
     [Dependency] private readonly DestructibleSystem _destructible = default!;
     [Dependency] private readonly SharedBatterySystem _battery = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
+    [Dependency] private readonly InjurableSystem _injurable = default!;
     [Dependency] private readonly SharedPopupSystem _popups = default!;
     [Dependency] private readonly StationSystem _station = default!;
     [Dependency] private readonly StationJobsSystem _stationJobs = default!;
@@ -82,7 +83,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
         SubscribeLocalEvent<StationAiCoreComponent, ContainerSpawnEvent>(OnContainerSpawn);
         SubscribeLocalEvent<StationAiCoreComponent, ApcPowerReceiverBatteryChangedEvent>(OnApcBatteryChanged);
         SubscribeLocalEvent<StationAiCoreComponent, ChargeChangedEvent>(OnChargeChanged);
-        SubscribeLocalEvent<StationAiCoreComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<StationAiCoreComponent, InjuriesChangedEvent>(OnDamageChanged);
         SubscribeLocalEvent<StationAiCoreComponent, DestructionEventArgs>(OnDestruction);
         SubscribeLocalEvent<StationAiCoreComponent, DoAfterAttemptEvent<IntellicardDoAfterEvent>>(OnDoAfterAttempt);
         SubscribeLocalEvent<StationAiCoreComponent, RejuvenateEvent>(OnRejuvenate);
@@ -147,7 +148,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
             _battery.SetCharge((ent, battery), battery.MaxCharge);
         }
 
-        _damageable.ClearAllDamage(ent.Owner);
+        _injurable.ClearAllInjuries(ent.Owner);
     }
 
     protected override void OnAiInsert(Entity<StationAiCoreComponent> ent, ref EntInsertedIntoContainerMessage args)
@@ -233,7 +234,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
         UpdateDamagedAccent(entity);
     }
 
-    private void OnDamageChanged(Entity<StationAiCoreComponent> entity, ref DamageChangedEvent args)
+    private void OnDamageChanged(Entity<StationAiCoreComponent> entity, ref InjuriesChangedEvent args)
     {
         UpdateCoreIntegrityAlert(entity);
         UpdateDamagedAccent(entity);
@@ -251,8 +252,8 @@ public sealed class StationAiSystem : SharedStationAiSystem
         if (TryComp<BatteryComponent>(ent, out var battery))
             accent.OverrideChargeLevel = _battery.GetChargeLevel((ent.Owner, battery));
 
-        if (TryComp<DamageableComponent>(ent, out var damageable))
-            accent.OverrideTotalDamage = _damageable.GetTotalDamage((ent, damageable));
+        if (TryComp<InjurableComponent>(ent, out var injurable))
+            accent.OverrideTotalDamage = _damageable.GetTotalDamage((ent, injurable));
 
         if (TryComp<DestructibleComponent>(ent, out var destructible))
             accent.DamageAtMaxCorruption = _destructible.DestroyedAt(ent, destructible);
@@ -287,7 +288,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
 
     private void UpdateCoreIntegrityAlert(Entity<StationAiCoreComponent> ent)
     {
-        if (!TryComp<DamageableComponent>(ent, out var damageable))
+        if (!TryComp<InjurableComponent>(ent, out var injurable))
             return;
 
         if (!TryComp<DestructibleComponent>(ent, out var destructible))
@@ -299,7 +300,7 @@ public sealed class StationAiSystem : SharedStationAiSystem
         if (!_proto.TryIndex(_damageAlert, out var proto))
             return;
 
-        var damagePercent = _damageable.GetTotalDamage((ent, damageable)) / _destructible.DestroyedAt(ent, destructible);
+        var damagePercent = _damageable.GetTotalDamage((ent, injurable)) / _destructible.DestroyedAt(ent, destructible);
         var damageLevel = Math.Round(damagePercent.Float() * proto.MaxSeverity);
 
         _alerts.ShowAlert(held.Value, _damageAlert, (short)Math.Clamp(damageLevel, 0, proto.MaxSeverity));

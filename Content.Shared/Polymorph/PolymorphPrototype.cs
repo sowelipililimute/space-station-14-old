@@ -70,12 +70,6 @@ public sealed partial record PolymorphConfiguration
     public bool Forced;
 
     /// <summary>
-    /// Whether or not the entity transfers its damage between forms.
-    /// </summary>
-    [DataField(serverOnly: true)]
-    public bool TransferDamage = true;
-
-    /// <summary>
     /// Whether or not the entity transfers its name between forms.
     /// </summary>
     [DataField(serverOnly: true)]

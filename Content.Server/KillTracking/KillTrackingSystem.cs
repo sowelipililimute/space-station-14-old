@@ -17,20 +17,17 @@ public sealed class KillTrackingSystem : EntitySystem
     public override void Initialize()
     {
         // Add damage to LifetimeDamage before MobStateChangedEvent gets raised
-        SubscribeLocalEvent<KillTrackerComponent, DamageChangedEvent>(OnDamageChanged, before: [ typeof(MobThresholdSystem) ]);
+        SubscribeLocalEvent<KillTrackerComponent, DamageDealtEvent>(OnDamageChanged, before: [ typeof(MobThresholdSystem) ]);
         SubscribeLocalEvent<KillTrackerComponent, MobStateChangedEvent>(OnMobStateChanged);
     }
 
-    private void OnDamageChanged(EntityUid uid, KillTrackerComponent component, DamageChangedEvent args)
+    private void OnDamageChanged(EntityUid uid, KillTrackerComponent component, ref DamageDealtEvent args)
     {
-        if (args.DamageDelta == null)
-            return;
-
         if (!args.DamageIncreased)
         {
             foreach (var key in component.LifetimeDamage.Keys)
             {
-                component.LifetimeDamage[key] -= args.DamageDelta.GetTotal();
+                component.LifetimeDamage[key] -= args.Damage.GetTotal();
             }
 
             return;
@@ -38,7 +35,7 @@ public sealed class KillTrackingSystem : EntitySystem
 
         var source = GetKillSource(args.Origin);
         var damage = component.LifetimeDamage.GetValueOrDefault(source);
-        component.LifetimeDamage[source] = damage + args.DamageDelta.GetTotal();
+        component.LifetimeDamage[source] = damage + args.Damage.GetTotal();
     }
 
     private void OnMobStateChanged(EntityUid uid, KillTrackerComponent component, MobStateChangedEvent args)

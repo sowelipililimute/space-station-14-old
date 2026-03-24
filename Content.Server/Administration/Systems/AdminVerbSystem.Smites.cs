@@ -220,7 +220,7 @@ public sealed partial class AdminVerbSystem
         };
         args.Verbs.Add(disposalBin);
 
-        if (TryComp<DamageableComponent>(args.Target, out var damageable) &&
+        if (TryComp<InjurableComponent>(args.Target, out var damageable) &&
             HasComp<MobStateComponent>(args.Target))
         {
             var hardElectrocuteName = Loc.GetString("admin-smite-electrocute-name").ToLowerInvariant();

@@ -16,7 +16,7 @@ public sealed class SlowOnDamageSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<SlowOnDamageComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<SlowOnDamageComponent, InjuriesChangedEvent>(OnDamageChanged);
         SubscribeLocalEvent<SlowOnDamageComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshMovespeed);
 
         SubscribeLocalEvent<ClothingSlowOnDamageModifierComponent, InventoryRelayedEvent<ModifySlowOnDamageSpeedEvent>>(OnModifySpeed);
@@ -31,10 +31,7 @@ public sealed class SlowOnDamageSystem : EntitySystem
 
     private void OnRefreshMovespeed(EntityUid uid, SlowOnDamageComponent component, RefreshMovementSpeedModifiersEvent args)
     {
-        if (!TryComp<DamageableComponent>(uid, out var damage))
-            return;
-
-        var totalDamage = _damage.GetTotalDamage((uid, damage));
+        var totalDamage = _damage.GetTotalDamage(uid);
 
         if (totalDamage == FixedPoint2.Zero)
             return;
@@ -58,7 +55,7 @@ public sealed class SlowOnDamageSystem : EntitySystem
         }
     }
 
-    private void OnDamageChanged(EntityUid uid, SlowOnDamageComponent component, DamageChangedEvent args)
+    private void OnDamageChanged(EntityUid uid, SlowOnDamageComponent component, InjuriesChangedEvent args)
     {
         // We -could- only refresh if it crossed a threshold but that would kind of be a lot of duplicated
         // code and this isn't a super hot path anyway since basically only humans have this

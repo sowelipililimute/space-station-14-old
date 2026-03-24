@@ -23,7 +23,6 @@ public sealed partial class DamageableSystem : EntitySystem
     [Dependency] private readonly SharedChemistryGuideDataSystem _chemistryGuideData = default!;
     [Dependency] private readonly SharedExplosionSystem _explosion = default!;
 
-    private EntityQuery<AppearanceComponent> _appearanceQuery;
     private EntityQuery<DamageableComponent> _damageableQuery;
 
     public float UniversalAllDamageModifier { get; private set; } = 1f;
@@ -37,41 +36,6 @@ public sealed partial class DamageableSystem : EntitySystem
     public float UniversalThrownDamageModifier { get; private set; } = 1f;
     public float UniversalTopicalsHealModifier { get; private set; } = 1f;
     public float UniversalMobDamageModifier { get; private set; } = 1f;
-
-    private Dictionary<ProtoId<DamageContainerPrototype>, HashSet<ProtoId<DamageTypePrototype>>> _supportedTypesByContainer = new();
-
-    /// <summary>
-    ///     If the damage in a DamageableComponent was changed this function should be called.
-    /// </summary>
-    /// <remarks>
-    ///     This updates cached damage information, flags the component as dirty, and raises a damage changed event.
-    ///     The damage changed event is used by other systems, such as damage thresholds.
-    /// </remarks>
-    private void OnEntityDamageChanged(
-        Entity<DamageableComponent> ent,
-        DamageSpecifier? damageDelta = null,
-        bool interruptsDoAfters = true,
-        EntityUid? origin = null
-    )
-    {
-        ent.Comp.Damage.GetDamagePerGroup(_prototypeManager, ent.Comp.DamagePerGroup);
-        ent.Comp.TotalDamage = ent.Comp.Damage.GetTotal();
-        Dirty(ent);
-
-        if (damageDelta != null && _appearanceQuery.TryGetComponent(ent, out var appearance))
-        {
-            _appearance.SetData(
-                ent,
-                DamageVisualizerKeys.DamageUpdateGroups,
-                new DamageVisualizerGroupData(ent.Comp.DamagePerGroup.Keys.ToList()),
-                appearance
-            );
-        }
-
-        // TODO DAMAGE
-        // byref struct event.
-        RaiseLocalEvent(ent, new DamageChangedEvent(ent.Comp, damageDelta, interruptsDoAfters, origin));
-    }
 
     /// <summary>
     /// Goes through an entity damage's and saves them inside a dictionary if the value is higher than 0

@@ -29,7 +29,7 @@ public sealed class ShowHealthBarsCommand : LocalizedEntityCommands
         {
             var showHealthBarsComponent = new ShowHealthBarsComponent
             {
-                DamageContainers = args.Select(arg => new ProtoId<DamageContainerPrototype>(arg)).ToList(),
+                DamageContainers = args.Select(arg => new ProtoId<InjuryContainerPrototype>(arg)).ToList(),
                 HealthStatusIcon = null,
                 NetSyncEnabled = false,
             };

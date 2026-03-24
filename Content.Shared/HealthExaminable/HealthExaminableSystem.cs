@@ -22,7 +22,7 @@ public sealed class HealthExaminableSystem : EntitySystem
 
     private void OnGetExamineVerbs(EntityUid uid, HealthExaminableComponent component, GetVerbsEvent<ExamineVerb> args)
     {
-        if (!TryComp<DamageableComponent>(uid, out var damage))
+        if (!TryComp<InjurableComponent>(uid, out var damage))
             return;
 
         var detailsRange = _examineSystem.IsInDetailsRange(args.User, uid);
@@ -44,7 +44,7 @@ public sealed class HealthExaminableSystem : EntitySystem
         args.Verbs.Add(verb);
     }
 
-    public FormattedMessage CreateMarkup(EntityUid uid, HealthExaminableComponent component, DamageableComponent damage)
+    public FormattedMessage CreateMarkup(EntityUid uid, HealthExaminableComponent component, InjurableComponent damage)
     {
         var msg = new FormattedMessage();
 

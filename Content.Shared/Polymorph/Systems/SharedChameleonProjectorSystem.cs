@@ -43,7 +43,7 @@ public abstract class SharedChameleonProjectorSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<ChameleonDisguiseComponent, InteractHandEvent>(OnDisguiseInteractHand, before: [typeof(SharedItemSystem)]);
-        SubscribeLocalEvent<ChameleonDisguiseComponent, DamageChangedEvent>(OnDisguiseDamaged);
+        SubscribeLocalEvent<ChameleonDisguiseComponent, DamageDealtEvent>(OnDisguiseDamaged);
         SubscribeLocalEvent<ChameleonDisguiseComponent, InsertIntoEntityStorageAttemptEvent>(OnDisguiseInsertAttempt);
         SubscribeLocalEvent<ChameleonDisguiseComponent, ComponentShutdown>(OnDisguiseShutdown);
         SubscribeLocalEvent<ChameleonDisguiseComponent, BeforeGettingEquippedHandEvent>(OnDisguiseBeforeEquippedHand);
@@ -68,11 +68,9 @@ public abstract class SharedChameleonProjectorSystem : EntitySystem
         args.Handled = true;
     }
 
-    private void OnDisguiseDamaged(Entity<ChameleonDisguiseComponent> ent, ref DamageChangedEvent args)
+    private void OnDisguiseDamaged(Entity<ChameleonDisguiseComponent> ent, ref DamageDealtEvent args)
     {
-        // this mirrors damage 1:1
-        if (args.DamageDelta is {} damage)
-            _damageable.TryChangeDamage(ent.Comp.User, damage);
+        _damageable.TryChangeDamage(ent.Comp.User, args.Damage);
     }
 
     private void OnDisguiseInsertAttempt(Entity<ChameleonDisguiseComponent> ent, ref InsertIntoEntityStorageAttemptEvent args)

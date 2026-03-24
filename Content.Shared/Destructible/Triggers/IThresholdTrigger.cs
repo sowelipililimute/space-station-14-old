@@ -18,10 +18,10 @@ public interface IThresholdTrigger
     /// <summary>
     /// Checks if this trigger has been reached.
     /// </summary>
-    /// <param name="damageable">The damageable component to check with.</param>
+    /// <param name="injurable">The injurable component to check with.</param>
     /// <param name="system">
     /// An instance of <see cref="SharedDestructibleSystem"/> to pull dependencies from, if any.
     /// </param>
     /// <returns>true if this trigger has been reached, false otherwise.</returns>
-    bool Reached(Entity<DamageableComponent> damageable, SharedDestructibleSystem system);
+    bool Reached(Entity<InjurableComponent> injurable, SharedDestructibleSystem system);
 }

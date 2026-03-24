@@ -32,7 +32,7 @@ public abstract partial class SharedDoAfterSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<DoAfterComponent, DamageChangedEvent>(OnDamage);
+        SubscribeLocalEvent<DoAfterComponent, DamageDealtEvent>(OnDamage);
         SubscribeLocalEvent<DoAfterComponent, EntityUnpausedEvent>(OnUnpaused);
         SubscribeLocalEvent<DoAfterComponent, ComponentGetState>(OnDoAfterGetState);
         SubscribeLocalEvent<DoAfterComponent, ComponentHandleState>(OnDoAfterHandleState);
@@ -54,14 +54,14 @@ public abstract partial class SharedDoAfterSystem : EntitySystem
     /// <summary>
     /// Cancels DoAfter if it breaks on damage and it meets the threshold
     /// </summary>
-    private void OnDamage(EntityUid uid, DoAfterComponent component, DamageChangedEvent args)
+    private void OnDamage(EntityUid uid, DoAfterComponent component, ref DamageDealtEvent args)
     {
         // If we're applying state then let the server state handle the do_after prediction.
         // This is to avoid scenarios where a do_after is erroneously cancelled on the final tick.
-        if (!args.InterruptsDoAfters || !args.DamageIncreased || args.DamageDelta == null || GameTiming.ApplyingState)
+        if (!args.InterruptsDoAfters || !args.DamageIncreased || GameTiming.ApplyingState)
             return;
 
-        var delta = args.DamageDelta.GetTotal();
+        var delta = args.Damage.GetTotal();
 
         var dirty = false;
         foreach (var doAfter in component.DoAfters.Values)

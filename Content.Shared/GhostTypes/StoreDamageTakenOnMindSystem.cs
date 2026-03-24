@@ -52,7 +52,7 @@ public sealed class StoreDamageTakenOnMindSystem : EntitySystem
     /// </summary>
     private void SaveBody(EntityUid ent)
     {
-        if (!TryComp<DamageableComponent>(ent, out var damageable)
+        if (!TryComp<InjurableComponent>(ent, out var damageable)
             || !TryComp<MindContainerComponent>(ent, out var mindContainer)
             || !HasComp<MindComponent>(mindContainer.Mind))
             return;

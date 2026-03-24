@@ -181,7 +181,7 @@ public sealed class CloningPodSystem : EntitySystem
         // end of biomass checks
 
         // genetic damage checks
-        if (TryComp<DamageableComponent>(bodyToClone, out var damageable) &&
+        if (TryComp<InjurableComponent>(bodyToClone, out var damageable) &&
             _damageable.GetAllDamage((bodyToClone, damageable)).DamageDict.TryGetValue("Cellular", out var cellularDmg))
         {
             var chance = Math.Clamp((float)(cellularDmg / 100), 0, 1);
