@@ -1,0 +1,30 @@
+<!--
+SPDX-FileCopyrightText: 2026 Janet Blackquill <uhhadd@gmail.com>
+
+SPDX-License-Identifier: MIT
+-->
+
+<controls:StellarCharacterWindow
+    xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.Character"
+    Title="{Loc 'character-info-title'}"
+    MinSize="700 500"
+    SetSize="700 500">
+
+    <BoxContainer Orientation="Horizontal">
+        <BoxContainer Orientation="Vertical" VerticalAlignment="Center" SetWidth="200">
+            <SpriteView Name="AttachedEntityView" OverrideDirection="South" Scale="4 4" HorizontalAlignment="Center" />
+            <RichTextLabel Name="CharacterName" HorizontalAlignment="Center" />
+            <BoxContainer Name="JobData" Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextureRect Name="JobIcon" TextureScale="2 2" VerticalAlignment="Center"/>
+                <RichTextLabel Name="JobName" VerticalAlignment="Center"/>
+            </BoxContainer>
+        </BoxContainer>
+        <PanelContainer StyleClasses="LowDivider" />
+        <PanelContainer HorizontalExpand="True" VerticalExpand="True" StyleClasses="PanelDark">
+            <ScrollContainer HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <BoxContainer Name="GoalContainer" RectClipContent="True" Orientation="Vertical" SeparationOverride="6" Margin="6" />
+            </ScrollContainer>
+        </PanelContainer>
+    </BoxContainer>
+</controls:StellarCharacterWindow>

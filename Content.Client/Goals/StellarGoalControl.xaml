@@ -1,0 +1,15 @@
+<PanelContainer
+    xmlns="https://spacestation14.io"
+    xmlns:goals="clr-namespace:Content.Client.Goals"
+    HorizontalExpand="True"
+    StyleClasses="BackgroundPanel">
+    <goals:StellarGoalProgressBar Name="PrimaryProgressBar" Margin="-14 -2" VerticalExpand="True" Modulate="#FFFFFF3F" />
+    <goals:StellarGoalProgressBar Name="SecondaryProgressBar" Margin="-14 -2" SetHeight="24" Visible="False" />
+    <BoxContainer Orientation="Horizontal" Margin="0 6" SeparationOverride="14">
+        <TextureRect Name="Icon" TextureScale="2 2" />
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalAlignment="Center">
+            <RichTextLabel Name="Title" HorizontalExpand="True"/>
+            <RichTextLabel Name="Description" HorizontalExpand="True"/>
+        </BoxContainer>
+    </BoxContainer>
+</PanelContainer>

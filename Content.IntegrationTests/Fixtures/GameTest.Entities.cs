@@ -1,8 +1,11 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Content.Server.Mind;
+using Content.Shared.Players;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Player;
 
 namespace Content.IntegrationTests.Fixtures;
 
@@ -224,5 +227,36 @@ public abstract partial class GameTest
     public void CQueueDel(EntityUid id)
     {
         CEntMan.QueueDeleteEntity(id);
+    }
+
+    /// <summary>
+    ///     Assigns the player a body in the test map, ensuring they have a mind as well.
+    /// </summary>
+    public async Task<EntityUid> AssignPlayerBody(ICommonSession session,
+        string playerPrototype = "InteractionTestMob",
+        bool godMode = true)
+    {
+        EntityUid res = default;
+
+        var mindSys = SEntMan.System<MindSystem>();
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(TestMap,
+                Is.Not.Null,
+                $"{nameof(AssignPlayerBody)} doesn't work without a {nameof(TestMap)}.");
+
+            // InteractionTest cargo cult.
+            mindSys.WipeMind(session.ContentData()?.Mind);
+
+            res = SEntMan.SpawnAtPosition(playerPrototype, TestMap.GridCoords);
+
+            mindSys.ControlMob(session.UserId, res);
+        });
+
+        // Sync them back up.
+        await Pair.RunTicksSync(5);
+
+        return res;
     }
 }
